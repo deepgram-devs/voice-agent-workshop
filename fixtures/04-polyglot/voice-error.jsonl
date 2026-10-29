@@ -1,0 +1,20 @@
+{"meta": {"mission": "04-polyglot", "recorded_at": "2026-10-06", "note": "Hand-built from live runs. UpdateSpeak with a voice the project can't use gets Error code INVALID_SETTINGS, and the server closes the connection at once, with no close code (1005). Here the close waits 1.5 s so the check can see your program hang up on its own."}}
+{"recv": {"type": "Welcome", "request_id": "00000000-0000-0000-0000-000000000000"}}
+{"expect": "Settings"}
+{"recv": {"type": "SettingsApplied"}}
+{"recv": {"type": "UserStartedSpeaking"}}
+{"recv": {"type": "ConversationText", "role": "user", "content": "Hi, could you help me find the schedule, please?", "languages": ["en"], "languages_hinted": ["en", "es", "fr"]}}
+{"recv": {"type": "EndOfTurn"}}
+{"wait_ms": 400}
+{"recv": {"type": "ConversationText", "role": "assistant", "content": "Sure. Which day are you looking for?"}}
+{"recv_binary": {"bytes": 4800}}
+{"recv": {"type": "AgentAudioDone"}}
+{"note": "Turn 2, Spanish. The program asks for the Spanish voice, and the switch fails."}
+{"recv": {"type": "UserStartedSpeaking"}}
+{"recv": {"type": "ConversationText", "role": "user", "content": "Hola, ¿me puede ayudar con el horario, por favor?", "languages": ["es"], "languages_hinted": ["en", "es", "fr"]}}
+{"recv": {"type": "EndOfTurn"}}
+{"wait_ms": 400}
+{"recv": {"type": "Error", "description": "Voice Agent component 'speak' is not authorized: your project does not have access to that voice.", "code": "INVALID_SETTINGS"}}
+{"note": "The real server closes right here. Your program should print what failed and hang up: the call is over."}
+{"wait_ms": 1500}
+{"close": {"code": 1000, "reason": "INVALID_SETTINGS"}}

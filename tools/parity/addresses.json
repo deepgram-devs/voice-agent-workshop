@@ -1,0 +1,70 @@
+{
+  "_": [
+    "What DEEPGRAM_AGENT_URL and WORKSHOP_URL may be. The address check is one pattern body in",
+    "python/agent/common.py, typescript/src/common.ts, java/src/main/java/agent/Credentials.java and",
+    "tools/replay-server/lib/target.mjs, and each one's unit tests read this file.",
+    "valid / invalid: the check alone. agent / workshop: [what you set, the address the program uses],",
+    "null for the line \"... isn't a valid address\". Hosts are stand-ins.",
+    "Refused on purpose, though some libraries accept them: user info, an empty port, port 0,",
+    "a space anywhere, a non-ASCII host."
+  ],
+  "valid": [
+    "wss://agent.example.test",
+    "wss://agent.example.test/v1/agent/converse",
+    "wss://agent.example.test:443",
+    "wss://speak-site.example.test/sdk",
+    "wss://speak-site.example.test/sdk/00-first-words",
+    "ws://localhost:8080/sdk",
+    "ws://host.docker.internal:8080/sdk",
+    "ws://127.0.0.1:8103",
+    "ws://[::1]:8080/sdk",
+    "ws://[::1]",
+    "wss://a-b_c.example.test.",
+    "ws://h:1",
+    "ws://h:65535",
+    "wss://h/a%20b"
+  ],
+  "invalid": [
+    "ws://127.0.0.1:abc",
+    "ws://h:0",
+    "ws://h:65536",
+    "ws://h:99999",
+    "ws://h:",
+    "ws:///x",
+    "ws://",
+    "ws://[::1",
+    "wss://u:p@h",
+    "wss://h/a b",
+    "wss://a b/sdk",
+    "wss://h/\t",
+    "wss://h\\x",
+    "wss://b\u00fccher.example.test",
+    "wss://h/caf\u00e9",
+    "WSS://agent.example.test",
+    "https://speak-site.example.test/sdk"
+  ],
+  "agent": [
+    ["wss://agent.example.test", "wss://agent.example.test"],
+    ["wss://agent.example.test/v1/agent/converse/", "wss://agent.example.test"],
+    [" wss://agent.example.test/ \n", "wss://agent.example.test"],
+    ["ws://127.0.0.1:8103", "ws://127.0.0.1:8103"],
+    ["ws://[::1]:8080", "ws://[::1]:8080"],
+    ["ws://127.0.0.1:abc", null],
+    ["ws://127.0.0.1:99999", null],
+    ["ws://127.0.0.1:8103/a b", null],
+    ["wss://agent example.test", null],
+    ["wss://u:p@agent.example.test", null],
+    ["ws:///x", null],
+    ["ws://[::1", null]
+  ],
+  "workshop": [
+    ["wss://speak-site.example.test/sdk", "wss://speak-site.example.test/sdk"],
+    ["https://speak-site.example.test/sdk/", "wss://speak-site.example.test/sdk"],
+    ["http://localhost:8080/sdk", "ws://localhost:8080/sdk"],
+    ["wss://speak-site.example.test/sdk/v1/agent/converse", "wss://speak-site.example.test/sdk"],
+    ["wss://speak site.example.test/sdk", null],
+    ["https://speak-site.example.test:abc/sdk", null],
+    ["wss://u:p@speak-site.example.test/sdk", null],
+    ["wss://speak-site.example.test/s dk", null]
+  ]
+}

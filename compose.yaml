@@ -1,0 +1,78 @@
+# Run the workshop in Docker, without VS Code (docs/python.md, docs/typescript.md and docs/java.md,
+# "Run it in Docker"). From the project folder (the one with this file), in this order:
+#
+#   docker compose run --rm workshop make setup SDK=py   # once: builds the image (a few minutes), installs the harness and Python (or SDK=ts), creates .env
+#   docker compose run --rm workshop make use py         # once: pick your language (or ts)
+#   docker compose run --rm workshop make check 00       # offline check: no key
+#   (open .env in this folder and set DEEPGRAM_API_KEY, or paste the two token lines from the workshop's /code page)
+#   docker compose run --rm workshop make run 00         # talk to your agent: type your turns. Needs the key or token
+#   docker compose run --rm workshop make live 00        # live check against the real API. Needs the key or token
+#   docker compose run --rm workshop                     # a shell, to run anything else
+#   docker compose down -v                               # when you're done: removes the installs (the volumes). To come back, run the make setup line again first
+#
+#   For Java, the same commands on the workshop-java service (the image plus a JDK 17):
+#   docker compose run --rm workshop-java make use java   # once: builds that image (a few minutes) and picks your language
+#   docker compose run --rm workshop-java make setup      # once: the harness, the Java helpers and, since uv and pnpm are in the image, Python and TypeScript too (SDK=java: Java only); creates .env
+#   docker compose run --rm workshop-java make check 00   # and run, live, a shell: as above, with workshop-java
+#
+# The repo is mounted at /workspace, so edits you make on your machine are what runs, and .env,
+# .workshop-lang (your language) and out/last-call.wav are your files. A container has no
+# microphone or speakers: type your turns, then play out/last-call.wav on your machine.
+# Installed packages live in volumes, not in the repo. The workshop service has no JDK: for Java
+# use workshop-java (docs/java.md). Docker Compose reads .env itself before the container
+# starts, so a quote that never closes, or a space where a key would be, stops it with
+# "failed to read .../.env" (a bare word with no = passes it).
+#
+# The project name is fixed, so every clone of this repo on one machine shares these volumes:
+# `down -v` from one clone removes the other's installs too, and says "Resource is still in use"
+# while any of them has a container running. After down -v the next run recreates the volumes
+# empty: make check then stops with "The check harness isn't installed" until make setup runs again.
+name: voice-agent-workshop
+
+services:
+  workshop:
+    build: .
+    working_dir: /workspace
+    stdin_open: true
+    tty: true
+    environment:
+      # Tells make and the check hints they run in this container: every next-command line
+      # gives its docker compose form too, MIC=1 stops (no microphone here), and the Java
+      # lines say this image has no JDK and name workshop-java. WORKSHOP_DOCKER_SERVICE is the
+      # service name those forms print.
+      WORKSHOP_IN_DOCKER: "1"
+      WORKSHOP_DOCKER_SERVICE: workshop
+    volumes:
+      # z: the SELinux label Fedora and RHEL need to share the folder; elsewhere it changes nothing.
+      - .:/workspace:z
+      - venv:/opt/venv
+      - ts_modules:/workspace/typescript/node_modules
+      - harness_modules:/workspace/tools/replay-server/node_modules
+      - home:/root
+
+  # The same image with a JDK 17 (Dockerfile JDK=17), for Java: `make use java`, then every
+  # command with `workshop-java` in place of `workshop`. It shares the volumes, so Python and
+  # TypeScript installs made in one service are there in the other; Maven's cache lands in home.
+  workshop-java:
+    build:
+      context: .
+      args:
+        JDK: "17"
+    working_dir: /workspace
+    stdin_open: true
+    tty: true
+    environment:
+      WORKSHOP_IN_DOCKER: "1"
+      WORKSHOP_DOCKER_SERVICE: workshop-java
+    volumes:
+      - .:/workspace:z
+      - venv:/opt/venv
+      - ts_modules:/workspace/typescript/node_modules
+      - harness_modules:/workspace/tools/replay-server/node_modules
+      - home:/root
+
+volumes:
+  venv:
+  ts_modules:
+  harness_modules:
+  home:

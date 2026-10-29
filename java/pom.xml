@@ -1,0 +1,149 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  The Java track of the workshop. One module: the helpers in src/main/java/agent
+  (every SDK call), their unit tests in src/test/java, and the missions and the
+  example, which the IDE sees as test sources (`make check` compiles a mission on
+  its own with javac, so one broken file never breaks another).
+
+  java/mission.sh runs Maven through ./mvnw: `compile` once at setup (it also writes
+  target/classpath.txt for the checks) and `test` for `make unit`. -Dsdk.version=x
+  builds against another deepgram-java-sdk release; JAVA_TARGET moves target/.
+-->
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+
+  <groupId>com.deepgram.workshop</groupId>
+  <artifactId>voice-agent-workshop</artifactId>
+  <version>1.0.0</version>
+  <name>Voice agent workshop (Java)</name>
+
+  <properties>
+    <!-- Pinned exactly: write code for this release. -->
+    <sdk.version>0.11.1</sdk.version>
+    <maven.compiler.release>17</maven.compiler.release>
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    <java.target>${project.basedir}/target</java.target>
+    <!-- Where a JDK comes from, as the Makefile's HOW_java says; the profiles below set apt. -->
+    <jdk.how>https://adoptium.net</jdk.how>
+  </properties>
+
+  <dependencies>
+    <dependency>
+      <groupId>com.deepgram</groupId>
+      <artifactId>deepgram-java-sdk</artifactId>
+      <version>${sdk.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.junit.jupiter</groupId>
+      <artifactId>junit-jupiter</artifactId>
+      <version>5.11.4</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>com.squareup.okhttp3</groupId>
+      <artifactId>mockwebserver</artifactId>
+      <version>4.12.0</version>
+      <scope>test</scope>
+    </dependency>
+  </dependencies>
+
+  <build>
+    <directory>${java.target}</directory>
+    <plugins>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-enforcer-plugin</artifactId>
+        <version>3.5.0</version>
+        <executions>
+          <execution>
+            <id>jdk</id>
+            <goals><goal>enforce</goal></goals>
+            <configuration>
+              <rules>
+                <requireJavaVersion>
+                  <version>[17,)</version>
+                  <message>This project needs a JDK 17 or newer (${jdk.how}).</message>
+                </requireJavaVersion>
+              </rules>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+      <plugin>
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>build-helper-maven-plugin</artifactId>
+        <version>3.6.0</version>
+        <executions>
+          <execution>
+            <id>missions-and-examples</id>
+            <phase>generate-test-sources</phase>
+            <goals><goal>add-test-source</goal></goals>
+            <configuration>
+              <sources>
+                <source>missions</source>
+                <source>examples</source>
+              </sources>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-dependency-plugin</artifactId>
+        <version>3.8.1</version>
+        <executions>
+          <!-- The classpath the checks run on (java/mission.sh reads it). -->
+          <execution>
+            <id>classpath</id>
+            <phase>generate-sources</phase>
+            <goals><goal>build-classpath</goal></goals>
+            <configuration>
+              <outputFile>${project.build.directory}/classpath.txt</outputFile>
+              <includeScope>runtime</includeScope>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-resources-plugin</artifactId>
+        <version>3.3.1</version>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-compiler-plugin</artifactId>
+        <version>3.13.0</version>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-surefire-plugin</artifactId>
+        <version>3.5.2</version>
+        <configuration>
+          <!-- The tests start java and node child processes on this classpath. -->
+          <useManifestOnlyJar>false</useManifestOnlyJar>
+          <trimStackTrace>true</trimStackTrace>
+        </configuration>
+      </plugin>
+    </plugins>
+  </build>
+
+  <!-- In Codespaces and the dev container (Debian 13: openjdk-21, no 17) a JDK comes from apt. -->
+  <profiles>
+    <profile>
+      <id>codespaces</id>
+      <activation><property><name>env.CODESPACES</name></property></activation>
+      <properties>
+        <jdk.how>sudo apt-get update &amp;&amp; sudo apt-get install -y openjdk-21-jdk-headless</jdk.how>
+      </properties>
+    </profile>
+    <profile>
+      <id>devcontainer</id>
+      <activation><property><name>env.DEVCONTAINER</name></property></activation>
+      <properties>
+        <jdk.how>sudo apt-get update &amp;&amp; sudo apt-get install -y openjdk-21-jdk-headless</jdk.how>
+      </properties>
+    </profile>
+  </profiles>
+</project>

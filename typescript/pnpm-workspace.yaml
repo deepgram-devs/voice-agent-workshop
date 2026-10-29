@@ -1,0 +1,4 @@
+# Standalone project: this file stops pnpm from joining a parent workspace.
+packages: []
+allowBuilds:
+  esbuild: true

@@ -1,0 +1,43 @@
+[project]
+name = "voice-agent-workshop"
+version = "0.1.0"
+description = "Hands-on voice agent missions on the Deepgram Python SDK"
+requires-python = ">=3.10"
+dependencies = [
+  # Exact pin: every mission is tested against this release. CI also runs the latest.
+  "deepgram-sdk==7.12.0",
+  # agent/common.py imports these two directly; the ranges are the SDK's own.
+  "pydantic>=2",
+  "websockets>=12",
+  "python-dotenv>=1.0",
+]
+
+[project.optional-dependencies]
+# Talk to the agent with your microphone and hear it through your speakers.
+# uv sync --extra mic
+mic = ["sounddevice>=0.5"]
+
+[dependency-groups]
+dev = ["pytest>=8", "pytest-asyncio>=0.24"]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.uv]
+# uv may fetch Python 3.12 when the machine has no Python 3.10+. Some distro uv
+# packages (Fedora's) turn downloads off by default, and `uv sync` then stops
+# with "No interpreter found".
+python-downloads = "automatic"
+
+[tool.hatch.build.targets.wheel]
+packages = ["agent"]
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
+testpaths = ["missions"]
+pythonpath = ["."]
+python_files = ["test_*.py"]
+filterwarnings = ["ignore::DeprecationWarning:websockets.*", "ignore::DeprecationWarning:deepgram.*"]
+markers = ["live: talks to the real Deepgram API (make live NN)"]
+addopts = "-m 'not live' -p no:cacheprovider"

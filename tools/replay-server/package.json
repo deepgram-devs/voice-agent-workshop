@@ -1,0 +1,19 @@
+{
+  "name": "replay-server",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Offline replay and live relay harness for the voice agent missions",
+  "type": "module",
+  "engines": {
+    "node": "^20.19.0 || >=22.12.0"
+  },
+  "bin": {
+    "replay-server": "./harness.mjs"
+  },
+  "scripts": {
+    "test": "node --test test/*.test.mjs"
+  },
+  "dependencies": {
+    "ws": "8.22.0"
+  }
+}

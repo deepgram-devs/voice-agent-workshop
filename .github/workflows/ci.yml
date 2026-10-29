@@ -1,0 +1,423 @@
+# Offline checks on every push and PR, against the pinned SDKs and the latest
+# releases (Java, opt-in, on JDK 21 and on JDK 17 too), plus the platform jobs:
+# a Windows-style clone, Fedora, Docker Engine, WSL, each page's laptop commands,
+# and the Java page's Codespaces path on the dev container image. The offline
+# matrix runs Node 20 on purpose: it is the harness's floor (20.19), so don't
+# bump it to 22. Live checks nightly and on demand, with a key from repository
+# secrets.
+#
+# Why nightly here (the workshop app's own workflow runs live checks on demand
+# only): this file ships with the standalone attendee repo, and a nightly live
+# run against the latest SDK releases is how that repo hears about an SDK or API
+# change before an attendee does. A copy of the repo with no DEEPGRAM_API_KEY
+# secret (a fork, a classroom clone) skips the nightly live job cleanly, with a
+# notice; a manual run without the key fails, so nobody reads a skip as a pass.
+#
+# Repository settings this needs:
+#   secret   DEEPGRAM_API_KEY     key for the live job
+#   secret   DEEPGRAM_AGENT_URL   optional endpoint for the live job (empty = production);
+#                                 a secret, so Actions masks it in the logs
+#   variable LIVE_SKIP            optional missions the live job leaves out, e.g. "01 02"
+#                                 when the key's project can't use the `timing` feature
+#   variable LIVE_AUDIO           optional "1": 02 and 04 play recorded callers
+#   secret   FORBIDDEN_TERMS      comma-separated names the name scan fails on; the
+#                                 scan fails when it's empty and skips fork PRs
+name: ci
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+  schedule:
+    - cron: '17 6 * * *'
+
+permissions:
+  contents: read
+
+jobs:
+  offline:
+    name: offline ${{ matrix.language }} (${{ matrix.sdk == 'pinned-jdk17' && 'pinned SDK, JDK 17' || format('{0} SDK', matrix.sdk) }})
+    runs-on: ubuntu-latest
+    # A check stuck on a pipe fails its own test at 60 s; this is the backstop.
+    timeout-minutes: 30
+    strategy:
+      fail-fast: false
+      matrix:
+        language: [py, ts, java]
+        sdk: [pinned, latest]
+        include:
+          # The oldest JDK the Java track supports, on the pinned SDK.
+          - language: java
+            sdk: pinned-jdk17
+    env:
+      SDK: ${{ matrix.language }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Install the check harness
+        run: make setup-harness
+
+      - if: matrix.language == 'py'
+        uses: astral-sh/setup-uv@v6
+      - if: matrix.language == 'py'
+        run: make setup-py
+      - if: matrix.language == 'py' && matrix.sdk == 'latest'
+        name: Upgrade to the latest deepgram-sdk
+        working-directory: python
+        run: |
+          uv pip install --upgrade deepgram-sdk
+          uv pip show deepgram-sdk | head -2
+          echo "UV_NO_SYNC=1" >> "$GITHUB_ENV"
+
+      - if: matrix.language == 'ts'
+        uses: pnpm/action-setup@v4
+        with:
+          version: 10
+      - if: matrix.language == 'ts'
+        run: make setup-ts
+      - if: matrix.language == 'ts'
+        working-directory: typescript
+        run: pnpm typecheck
+      - if: matrix.language == 'ts' && matrix.sdk == 'latest'
+        name: Upgrade to the latest @deepgram/sdk
+        working-directory: typescript
+        run: |
+          pnpm add --save-exact @deepgram/sdk@latest
+          pnpm list @deepgram/sdk
+          pnpm typecheck
+
+      - if: matrix.language == 'java'
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: ${{ matrix.sdk == 'pinned-jdk17' && '17' || '21' }}
+          cache: maven
+          cache-dependency-path: java/pom.xml
+      - if: matrix.language == 'java' && matrix.sdk == 'latest'
+        name: Use the latest com.deepgram:deepgram-java-sdk
+        run: |
+          v=$(curl -fsSL https://repo1.maven.org/maven2/com/deepgram/deepgram-java-sdk/maven-metadata.xml | sed -n 's:.*<release>\(.*\)</release>.*:\1:p')
+          test -n "$v"
+          echo "JAVA_SDK_VERSION=$v" >> "$GITHUB_ENV"
+          echo "deepgram-java-sdk $v"
+      - if: matrix.language == 'java'
+        run: make setup-java
+
+      - name: Harness self-test, helper unit tests, solutions pass, start files fail
+        run: make ci
+
+  # --- Other platforms (README "On Windows", "On Linux") ---
+  # Windows runners can't run Linux containers, so Docker Desktop, Dev Containers
+  # and Codespaces from a Windows browser are tested by hand.
+
+  # A Windows-style clone on Linux: Git for Windows' core.autocrlf=true, as in the
+  # folder Docker Desktop and Dev Containers mount from C:\. .gitattributes keeps
+  # every text file LF, so the Dev Containers script runs and make ci passes.
+  crlf-clone:
+    name: Windows-style clone (autocrlf=true)
+    runs-on: ubuntu-latest
+    steps:
+      - run: git config --global core.autocrlf true
+      - uses: actions/checkout@v4
+      - name: Every text file is LF
+        run: |
+          file .devcontainer/*.sh Makefile
+          if git ls-files --eol | grep -E 'w/(crlf|mixed)' | grep -vE '\.(cmd|bat)$'; then exit 1; fi
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - uses: astral-sh/setup-uv@v6
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10
+      - name: The Dev Containers setup script
+        run: bash .devcontainer/post-create.sh
+      - run: make ci
+
+  # Fedora's own packages: Node.js, uv (python downloads off by default; the
+  # pyproject turns them on) and GNU Make 4.4, with bash as /bin/sh.
+  fedora:
+    name: Fedora (distro Node.js, uv, make 4.4)
+    runs-on: ubuntu-latest
+    container: fedora:42
+    steps:
+      - run: dnf install -y git make nodejs npm uv findutils which file
+      - uses: actions/checkout@v4
+      # The workspace belongs to the runner's user and steps run as root: without
+      # this, git refuses the checkout ("dubious ownership") and the eol test can't run.
+      - run: git config --global --add safe.directory "$GITHUB_WORKSPACE"
+      - run: npm install -g pnpm@10
+      - run: node --version && make --version && uv --version
+      - run: make setup USE_HINT=0 && make ci
+
+  # Docker Engine on Linux, rootful: the three pages' Docker blocks as written (the first command
+  # builds the image; the first check on the untouched start file fails on purpose, and make exits
+  # 2 for any failed recipe), the recovery after `down -v` (the harness line in both services'
+  # forms, then make setup, which refetches the Java SDK), files the container makes are root's,
+  # and the README's chown line gives every one back.
+  docker-linux:
+    name: Docker Engine on Linux (compose)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: The Python page's Docker commands
+        run: |
+          docker compose run --rm -T workshop make setup SDK=py
+          docker compose run --rm -T workshop make use py
+          status=0; docker compose run --rm -T workshop make check 00 > check.log 2>&1 || status=$?
+          cat check.log; test "$status" = 2
+          grep -q 'Your file: python/missions/00-first-words/start.py:13 (TODO 1)' check.log
+          docker compose run --rm -T workshop make check 00 MISSION_TARGET=solution
+      - name: The TypeScript page's Docker commands
+        run: |
+          docker compose run --rm -T workshop make setup SDK=ts
+          docker compose run --rm -T workshop make use ts
+          status=0; docker compose run --rm -T workshop make check 00 > check.log 2>&1 || status=$?
+          cat check.log; test "$status" = 2
+          grep -q 'Your file: typescript/missions/00-first-words/start.ts:12 (TODO 1)' check.log
+          docker compose run --rm -T workshop make check 00 MISSION_TARGET=solution
+      - name: The Java page's Docker commands (the workshop-java service)
+        run: |
+          set -o pipefail
+          docker compose run --rm -T workshop-java make use java
+          docker compose run --rm -T workshop-java make setup | tee setup.log
+          grep -q '^\[setup\] Building the Java helpers and fetching the SDK' setup.log
+          status=0; docker compose run --rm -T workshop-java make check 00 > check.log 2>&1 || status=$?
+          cat check.log; test "$status" = 2
+          grep -q 'Your file: java/missions/m00_first_words/Start.java:21 (TODO 1)' check.log
+          docker compose run --rm -T workshop-java make check 00 MISSION_TARGET=solution
+      - name: After down -v, the first check names the harness (in both services' forms), and make setup brings every language back
+        run: |
+          set -o pipefail
+          docker compose down -v
+          status=0; docker compose run --rm -T workshop-java make check 00 > after.log 2>&1 || status=$?
+          cat after.log; test "$status" = 2
+          grep -qF "The check harness isn't installed. Run docker compose run --rm workshop-java make setup once, then this command again." after.log
+          status=0; docker compose run --rm -T workshop make check 00 SDK=ts > after-ts.log 2>&1 || status=$?
+          cat after-ts.log; test "$status" = 2
+          grep -qF "The check harness isn't installed. Run docker compose run --rm workshop make setup once, then this command again." after-ts.log
+          docker compose run --rm -T workshop-java make setup | tee again.log
+          grep -q '^\[setup\] Building the Java helpers and fetching the SDK' again.log
+          docker compose run --rm -T workshop-java make check 00 MISSION_TARGET=solution
+          docker compose run --rm -T workshop make check 00 SDK=py MISSION_TARGET=solution
+          docker compose run --rm -T workshop make check 00 SDK=ts MISSION_TARGET=solution
+      - name: Container-made files are root's; the README's chown line gives them back
+        run: |
+          stat -c '%U %n' .env .workshop-lang typescript/node_modules tools/replay-server/node_modules
+          test "$(stat -c %u .env)" = 0
+          sudo chown -R "$(id -u):$(id -g)" .
+          for f in .env .workshop-lang typescript/node_modules tools/replay-server/node_modules; do test -O "$f" || { echo "$f is not ours"; exit 1; }; done
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: On the host after the chown, setup and make use work
+        run: make setup-harness && make use ts && test -O .workshop-lang
+
+  # The three pages' laptop sequences, as written: `make setup SDK=py` (or ts; Java is
+  # `make use java` then plain `make setup`, which skips the tracks whose tools are absent and
+  # says so: ubuntu-latest ships neither uv nor pnpm), `make use`, the first `make check 00` on
+  # the untouched start file (it fails on purpose: make exits 2 and the `Your file:` line names
+  # TODO 1), then the reference answer. The offline matrix above installs by target
+  # (setup-harness, setup-<id>) and never runs these lines.
+  host-sequence:
+    name: the ${{ matrix.language }} page's commands on a laptop
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        language: [py, ts, java]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - if: matrix.language == 'py'
+        uses: astral-sh/setup-uv@v6
+      - if: matrix.language == 'ts'
+        uses: pnpm/action-setup@v4
+        with:
+          version: 10
+      - if: matrix.language == 'java'
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 21
+      - if: matrix.language == 'py'
+        name: docs/python.md, Do this then Check that it works
+        run: |
+          make setup SDK=py
+          make use py
+          status=0; make check 00 > check.log 2>&1 || status=$?
+          cat check.log; test "$status" = 2
+          grep -q 'Your file: python/missions/00-first-words/start.py:13 (TODO 1)' check.log
+          make check 00 MISSION_TARGET=solution
+      - if: matrix.language == 'ts'
+        name: docs/typescript.md, Do this then Check that it works
+        run: |
+          make setup SDK=ts
+          make use ts
+          status=0; make check 00 > check.log 2>&1 || status=$?
+          cat check.log; test "$status" = 2
+          grep -q 'Your file: typescript/missions/00-first-words/start.ts:12 (TODO 1)' check.log
+          make check 00 MISSION_TARGET=solution
+      - if: matrix.language == 'java'
+        name: docs/java.md, Do this then Check that it works
+        run: |
+          set -o pipefail
+          make use java
+          make setup | tee setup.log
+          grep -qF 'Skipping Python: it needs uv (https://docs.astral.sh/uv/).' setup.log
+          grep -qF 'Skipping TypeScript: it needs pnpm (npm install -g pnpm@10).' setup.log
+          grep -q '^\[setup\] Building the Java helpers and fetching the SDK' setup.log
+          status=0; make check 00 > check.log 2>&1 || status=$?
+          cat check.log; test "$status" = 2
+          grep -q 'Your file: java/missions/m00_first_words/Start.java:21 (TODO 1)' check.log
+          make check 00 MISSION_TARGET=solution
+
+  # The Java page's Codespaces path on the image .devcontainer/devcontainer.json pins
+  # (Debian 13, trixie): the dev container's setup script, then docs/java.md's apt line,
+  # `make use java`, `make setup`, the first failing check and the reference answer. The
+  # devcontainer Node feature does not apply under `container:`, so Node 22 is set up here.
+  # If actions/setup-node cannot run inside this container, the fallback is the page's own
+  # NodeSource line (`curl -fsSL https://deb.nodesource.com/setup_22.x | bash - &&
+  # apt-get install -y nodejs`), as the wsl job does; the local twin of this job ran that
+  # way, as root in the image, and passed end to end.
+  codespaces:
+    name: Codespaces image (python:3.12-trixie), the Java page's path
+    runs-on: ubuntu-latest
+    container: mcr.microsoft.com/devcontainers/python:3.12-trixie
+    env:
+      DEVCONTAINER: "true"
+    steps:
+      - uses: actions/checkout@v4
+      - run: git config --global --add safe.directory "$GITHUB_WORKSPACE"
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: The dev container's setup script (post-create.sh)
+        run: bash .devcontainer/post-create.sh
+      - name: docs/java.md, Can't install anything? steps 2 and 3
+        run: |
+          set -o pipefail
+          sudo apt-get update && sudo apt-get install -y openjdk-21-jdk-headless
+          make use java
+          make setup | tee setup.log
+          grep -q '^\[setup\] Building the Java helpers and fetching the SDK' setup.log
+      - name: Check that it works
+        run: |
+          status=0; make check 00 > check.log 2>&1 || status=$?
+          cat check.log; test "$status" = 2
+          grep -q 'Your file: java/missions/m00_first_words/Start.java:21 (TODO 1)' check.log
+          make check 00 MISSION_TARGET=solution
+
+  # WSL Ubuntu 24.04 with the repo cloned into the Linux home folder, as README
+  # "On Windows" says: Node.js 22 from NodeSource (apt's 18 is too old), uv, pnpm.
+  wsl:
+    name: WSL Ubuntu 24.04 (repo in the Linux home folder)
+    runs-on: windows-latest
+    defaults:
+      run:
+        shell: wsl-bash {0}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: Vampire/setup-wsl@v7
+        with:
+          distribution: Ubuntu-24.04
+          additional-packages: make git curl ca-certificates
+      - name: Node.js 22, uv and pnpm inside WSL
+        run: |
+          curl -fsSL https://deb.nodesource.com/setup_22.x | bash -
+          apt-get install -y nodejs
+          curl -LsSf https://astral.sh/uv/install.sh | env UV_INSTALL_DIR=/usr/local/bin sh
+          npm install -g pnpm@10
+      - name: Clone into the home folder, then the attendee steps and make ci
+        run: |
+          git config --global --add safe.directory '*'
+          git clone -q "$(wslpath -u '${{ github.workspace }}')" ~/w
+          cd ~/w
+          make setup USE_HINT=0
+          make use py
+          make check 00 MISSION_TARGET=solution
+          make ci
+
+  names:
+    name: name scan
+    # Fork PRs and Dependabot runs get no repository secrets: skip them here, by name.
+    if: >-
+      github.actor != 'dependabot[bot]' &&
+      (github.event_name != 'pull_request' ||
+       github.event.pull_request.head.repo.full_name == github.repository)
+    runs-on: ubuntu-latest
+    env:
+      FORBIDDEN_TERMS: ${{ secrets.FORBIDDEN_TERMS }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: The term list is set
+        run: |
+          if [ -z "$(printf '%s' "$FORBIDDEN_TERMS" | tr -d ' ,')" ]; then
+            echo "::error::FORBIDDEN_TERMS is empty. Add it as a repository secret (comma-separated terms)."
+            exit 1
+          fi
+      - name: No forbidden names in tracked files
+        run: make names
+
+  live-key:
+    name: live key present
+    if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    outputs:
+      present: ${{ steps.key.outputs.present }}
+    env:
+      DEEPGRAM_API_KEY: ${{ secrets.DEEPGRAM_API_KEY }}
+    steps:
+      - id: key
+        run: |
+          if [ -n "$DEEPGRAM_API_KEY" ]; then
+            echo "present=true" >> "$GITHUB_OUTPUT"
+          elif [ "$GITHUB_EVENT_NAME" = "workflow_dispatch" ]; then
+            echo "::error::DEEPGRAM_API_KEY is not set. Add it as a repository secret to run the live checks."
+            exit 1
+          else
+            echo "::notice::DEEPGRAM_API_KEY is not set, so the nightly live checks skip. Add the secret to turn them on."
+            echo "present=false" >> "$GITHUB_OUTPUT"
+          fi
+
+  live:
+    name: live ${{ matrix.language }}
+    needs: live-key
+    if: needs.live-key.outputs.present == 'true'
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        language: [py, ts]
+    env:
+      SDK: ${{ matrix.language }}
+      MISSION_TARGET: solution
+      DEEPGRAM_API_KEY: ${{ secrets.DEEPGRAM_API_KEY }}
+      DEEPGRAM_AGENT_URL: ${{ secrets.DEEPGRAM_AGENT_URL }}
+      LIVE_SKIP: ${{ vars.LIVE_SKIP }}
+      LIVE_AUDIO: ${{ vars.LIVE_AUDIO }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - run: make setup-harness
+      - if: matrix.language == 'py'
+        uses: astral-sh/setup-uv@v6
+      - if: matrix.language == 'py'
+        run: make setup-py
+      - if: matrix.language == 'ts'
+        uses: pnpm/action-setup@v4
+        with:
+          version: 10
+      - if: matrix.language == 'ts'
+        run: make setup-ts
+      - name: Live check for every mission with checks, minus LIVE_SKIP
+        run: make live-all

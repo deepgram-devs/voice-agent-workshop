@@ -1,0 +1,15 @@
+{"meta": {"mission": "02-read-the-room", "written": "2026-10-06", "note": "Hand-written. Two annoyed turns that never reach the limit: escalated stays false, so no recovery."}}
+{"recv": {"type": "Welcome", "request_id": "00000000-0000-0000-0000-000000000000"}}
+{"expect": "Settings"}
+{"recv": {"type": "SettingsApplied"}}
+{"recv": {"type": "ConversationText", "role": "user", "content": "Ugh, the wifi password again?"}}
+{"recv": {"type": "FrustrationDetected", "count": 1, "escalated": false}}
+{"wait_ms": 200}
+{"recv": {"type": "ConversationText", "role": "assistant", "content": "It's on the back of your badge, under the QR code."}}
+{"recv_binary": {"bytes": 9600}}
+{"recv": {"type": "ConversationText", "role": "user", "content": "Oh. Fine. Where's lunch?"}}
+{"recv": {"type": "FrustrationDetected", "count": 2, "escalated": false}}
+{"wait_ms": 300}
+{"recv": {"type": "ConversationText", "role": "assistant", "content": "Lunch is in Hall B from noon."}}
+{"recv_binary": {"bytes": 9600}}
+{"close": {"code": 1000, "reason": "replay finished"}}

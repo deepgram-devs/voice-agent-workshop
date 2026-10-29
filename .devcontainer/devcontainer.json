@@ -1,0 +1,30 @@
+{
+  // Zero-install setup: open this repo in GitHub Codespaces (or VS Code's Dev Containers)
+  // and everything the missions need is ready: Python 3.12 with uv, Node.js 22 with
+  // pnpm, make, and `make setup` already run. Add DEEPGRAM_API_KEY as a Codespaces
+  // secret, or put it in .env once the container starts. A Codespace has no microphone or
+  // speakers: type your turns (MIC=1 works on your own machine), and download out/last-call.wav.
+  "name": "Voice agent workshop",
+  "image": "mcr.microsoft.com/devcontainers/python:3.12-trixie",
+  "features": {
+    "ghcr.io/devcontainers/features/node:1": { "version": "22" }
+  },
+  // The image is pinned to Debian 13 (trixie): the apt line make, mission.sh and docs/java.md give for a JDK
+  // (openjdk-21-jdk-headless) is Debian 13's. Tells make it runs here, so `make use java` gives that line.
+  "containerEnv": { "DEVCONTAINER": "true" },
+  "postCreateCommand": "bash .devcontainer/post-create.sh",
+  "secrets": {
+    "DEEPGRAM_API_KEY": {
+      "description": "Your Deepgram API key. Free key: https://console.deepgram.com/signup",
+      "documentationUrl": "https://console.deepgram.com/signup"
+    }
+  },
+  "customizations": {
+    "vscode": {
+      "extensions": ["ms-python.python"]
+    },
+    "codespaces": {
+      "openFiles": ["README.md", "missions/00-first-words/README.md"]
+    }
+  }
+}

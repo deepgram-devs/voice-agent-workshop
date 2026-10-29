@@ -1,0 +1,11 @@
+{"meta": {"mission": "03-no-dead-air", "written": "2026-10-06", "note": "Hand-written. A quick tool: listItems answers at once."}}
+{"recv": {"type": "Welcome", "request_id": "00000000-0000-0000-0000-000000000000"}}
+{"expect": "Settings"}
+{"recv": {"type": "SettingsApplied"}}
+{"recv": {"type": "ConversationText", "role": "user", "content": "What's on my list?"}}
+{"recv": {"type": "FunctionCallRequest", "functions": [{"id": "call_list_1", "name": "listItems", "arguments": "{}", "client_side": true}]}}
+{"expect": "FunctionCallResponse", "timeout_ms": 5000}
+{"recv": {"type": "ConversationText", "role": "assistant", "content": "You have three things: buy milk, call the dentist, and book the flight home."}}
+{"recv_binary": {"bytes": 9600}}
+{"recv": {"type": "AgentAudioDone"}}
+{"close": {"code": 1000, "reason": "replay finished"}}

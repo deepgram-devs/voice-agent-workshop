@@ -1,0 +1,12 @@
+{"meta": {"mission": "03-no-dead-air", "written": "2026-10-06", "note": "Hand-written, then checked against a live recording on 2026-10-06: same frame types and order. The id is fixed so the check can match it. The live server also echoes your filler as an assistant ConversationText; that is left out so this replay works whether or not you sent one."}}
+{"recv": {"type": "Welcome", "request_id": "00000000-0000-0000-0000-000000000000"}}
+{"expect": "Settings"}
+{"recv": {"type": "SettingsApplied"}}
+{"recv": {"type": "ConversationText", "role": "user", "content": "Please delete buy milk from my to-do list.", "conversational_behavior": "default"}}
+{"recv": {"type": "FunctionCallRequest", "functions": [{"id": "call_delete_milk_1", "name": "deleteItem", "arguments": "{\"item\": \"buy milk\"}", "client_side": true}]}}
+{"note": "deleteItem takes three seconds. The filler line should arrive right away, the response about three seconds later."}
+{"expect": "FunctionCallResponse", "timeout_ms": 8000}
+{"recv": {"type": "ConversationText", "role": "assistant", "content": "I have deleted buy milk from your to-do list.", "conversational_behavior": "default"}}
+{"recv_binary": {"bytes": 9600}}
+{"recv": {"type": "AgentAudioDone"}}
+{"close": {"code": 1000, "reason": "replay finished"}}

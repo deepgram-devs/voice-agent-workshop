@@ -1,0 +1,10 @@
+.env
+out/
+node_modules/
+.venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+.workshop-lang
+java/target/
+*.class

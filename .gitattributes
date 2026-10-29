@@ -1,0 +1,13 @@
+# Every text file is LF in every checkout, Windows included: bash, make and the
+# tests read these files in WSL, Docker and Dev Containers, and a CRLF script
+# stops on `pipefail\r`. tools/make/eol.test.mjs clones the repo the Windows
+# way (core.autocrlf=true) to keep it so.
+* text=auto eol=lf
+# Recorded audio for the live checks: never touch line endings.
+*.wav binary
+# Windows-only scripts keep CRLF.
+*.cmd text eol=crlf
+*.bat text eol=crlf
+# Java: a jar is binary; the Maven wrapper is a shell script and stays LF everywhere.
+*.jar binary
+mvnw text eol=lf

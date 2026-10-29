@@ -1,0 +1,30 @@
+{"meta": {"mission": "04-polyglot", "recorded_at": "2026-10-06", "note": "Built from a live run on production (flux-general-multi, UpdateSpeak to an Aura-2 Spanish voice answered SpeakUpdated). Typed turns carry no `languages`, so the user turns and their `languages` were added by hand. languages_hinted echoes the Settings hints."}}
+{"recv": {"type": "Welcome", "request_id": "00000000-0000-0000-0000-000000000000"}}
+{"expect": "Settings"}
+{"recv": {"type": "SettingsApplied"}}
+{"note": "Turn 1, English. The voice is already English: no UpdateSpeak."}
+{"recv": {"type": "UserStartedSpeaking"}}
+{"recv": {"type": "ConversationText", "role": "user", "content": "Hi, could you help me find the schedule, please?", "languages": ["en"], "languages_hinted": ["en", "es", "fr"]}}
+{"recv": {"type": "EndOfTurn"}}
+{"wait_ms": 400}
+{"recv": {"type": "ConversationText", "role": "assistant", "content": "Sure. Which day are you looking for?"}}
+{"recv_binary": {"bytes": 4800}}
+{"recv": {"type": "AgentAudioDone"}}
+{"note": "Turn 2, Spanish. The program should send one UpdateSpeak here."}
+{"recv": {"type": "UserStartedSpeaking"}}
+{"recv": {"type": "ConversationText", "role": "user", "content": "Hola, ¿me puede ayudar con el horario, por favor?", "languages": ["es"], "languages_hinted": ["en", "es", "fr"]}}
+{"recv": {"type": "EndOfTurn"}}
+{"wait_ms": 400}
+{"recv": {"type": "SpeakUpdated"}}
+{"recv": {"type": "ConversationText", "role": "assistant", "content": "Claro, ¿qué día le interesa?"}}
+{"recv_binary": {"bytes": 4800}}
+{"recv": {"type": "AgentAudioDone"}}
+{"note": "Turn 3, still mostly Spanish. The voice is already Spanish: no second UpdateSpeak."}
+{"recv": {"type": "UserStartedSpeaking"}}
+{"recv": {"type": "ConversationText", "role": "user", "content": "El jueves, ¿a qué hora empieza el workshop?", "languages": ["es", "en"], "languages_hinted": ["en", "es", "fr"]}}
+{"recv": {"type": "EndOfTurn"}}
+{"wait_ms": 400}
+{"recv": {"type": "ConversationText", "role": "assistant", "content": "El jueves empieza a la una y media."}}
+{"recv_binary": {"bytes": 4800}}
+{"recv": {"type": "AgentAudioDone"}}
+{"close": {"code": 1000, "reason": "replay finished"}}

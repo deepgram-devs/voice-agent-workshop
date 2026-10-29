@@ -1,0 +1,52 @@
+{"meta": {"mission": "05-mystery-guest", "written": "2026-10-06", "note": "Hand-written, shaped on the mission 01 live run. Five turns, none of them a correct guess. The program should send one UpdatePrompt with a clue after the fourth user line and before the fifth. The agent replies never name anyone."}}
+{"recv": {"type": "Welcome", "request_id": "00000000-0000-0000-0000-000000000000"}}
+{"expect": "Settings"}
+{"recv": {"type": "SettingsApplied"}}
+{"note": "No greeting in this mission: the agent waits for the first question."}
+{"wait_ms": 150}
+{"recv": {"type": "UserStartedSpeaking"}}
+{"recv": {"type": "ConversationText", "role": "user", "content": "Hello! What do you do all day?"}}
+{"recv": {"type": "History", "role": "user", "content": "Hello! What do you do all day?"}}
+{"wait_ms": 300}
+{"recv_binary": {"bytes": 3552}}
+{"recv": {"type": "ConversationText", "role": "assistant", "content": "Mostly I work, and I argue with people who think they know better."}}
+{"recv": {"type": "History", "role": "assistant", "content": "Mostly I work, and I argue with people who think they know better."}}
+{"recv_binary": {"bytes": 9600}}
+{"recv": {"type": "AgentAudioDone"}}
+{"recv": {"type": "UserStartedSpeaking"}}
+{"recv": {"type": "ConversationText", "role": "user", "content": "Where do you live?"}}
+{"recv": {"type": "History", "role": "user", "content": "Where do you live?"}}
+{"wait_ms": 300}
+{"recv_binary": {"bytes": 3552}}
+{"recv": {"type": "ConversationText", "role": "assistant", "content": "Far from where I was born, which suits me."}}
+{"recv": {"type": "History", "role": "assistant", "content": "Far from where I was born, which suits me."}}
+{"recv_binary": {"bytes": 9600}}
+{"recv": {"type": "AgentAudioDone"}}
+{"recv": {"type": "UserStartedSpeaking"}}
+{"recv": {"type": "ConversationText", "role": "user", "content": "Who pays for your work?"}}
+{"recv": {"type": "History", "role": "user", "content": "Who pays for your work?"}}
+{"wait_ms": 300}
+{"recv_binary": {"bytes": 3552}}
+{"recv": {"type": "ConversationText", "role": "assistant", "content": "Patrons, when I can find them, and never enough."}}
+{"recv": {"type": "History", "role": "assistant", "content": "Patrons, when I can find them, and never enough."}}
+{"recv_binary": {"bytes": 9600}}
+{"recv": {"type": "AgentAudioDone"}}
+{"recv": {"type": "UserStartedSpeaking"}}
+{"recv": {"type": "ConversationText", "role": "user", "content": "Are you a painter?"}}
+{"recv": {"type": "History", "role": "user", "content": "Are you a painter?"}}
+{"wait_ms": 300}
+{"recv_binary": {"bytes": 3552}}
+{"recv": {"type": "ConversationText", "role": "assistant", "content": "No, not him. Ask me something else."}}
+{"recv": {"type": "History", "role": "assistant", "content": "No, not him. Ask me something else."}}
+{"recv_binary": {"bytes": 9600}}
+{"recv": {"type": "AgentAudioDone"}}
+{"recv": {"type": "UserStartedSpeaking"}}
+{"recv": {"type": "ConversationText", "role": "user", "content": "Give me a hint, please."}}
+{"recv": {"type": "History", "role": "user", "content": "Give me a hint, please."}}
+{"wait_ms": 300}
+{"recv_binary": {"bytes": 3552}}
+{"recv": {"type": "ConversationText", "role": "assistant", "content": "Think of the thing I am best known for, and where I did it."}}
+{"recv": {"type": "History", "role": "assistant", "content": "Think of the thing I am best known for, and where I did it."}}
+{"recv_binary": {"bytes": 9600}}
+{"recv": {"type": "AgentAudioDone"}}
+{"wait_ms": 300}

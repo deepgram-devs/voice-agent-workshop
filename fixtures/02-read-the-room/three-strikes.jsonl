@@ -1,0 +1,24 @@
+{"meta": {"mission": "02-read-the-room", "written": "2026-10-06", "note": "Hand-written: typed input can't be relied on to trigger FrustrationDetected live. Shapes follow the timing spec: count is cumulative, escalated turns true at frustration_max_count and stays true."}}
+{"recv": {"type": "Welcome", "request_id": "00000000-0000-0000-0000-000000000000"}}
+{"expect": "Settings"}
+{"recv": {"type": "SettingsApplied"}}
+{"recv": {"type": "ConversationText", "role": "user", "content": "Hi, where do I pick up my badge?"}}
+{"recv": {"type": "ConversationText", "role": "assistant", "content": "Badges are at the registration desk by the main entrance."}}
+{"recv_binary": {"bytes": 9600}}
+{"recv": {"type": "ConversationText", "role": "user", "content": "I was just there. They sent me back here."}}
+{"recv": {"type": "FrustrationDetected", "count": 1, "escalated": false}}
+{"wait_ms": 200}
+{"recv": {"type": "ConversationText", "role": "assistant", "content": "Sorry about that. Try the help desk next to registration."}}
+{"recv_binary": {"bytes": 9600}}
+{"recv": {"type": "ConversationText", "role": "user", "content": "Seriously? Listen to me. I need my badge."}}
+{"note": "frustration_max_count reached: escalated flips to true here. The recovery UpdatePrompt belongs right after this event."}
+{"recv": {"type": "FrustrationDetected", "count": 2, "escalated": true}}
+{"expect": "UpdatePrompt", "timeout_ms": 3000}
+{"recv": {"type": "PromptUpdated"}}
+{"recv": {"type": "ConversationText", "role": "user", "content": "This is ridiculous."}}
+{"note": "Still escalated. A second recovery here is the bug the mission fixes."}
+{"recv": {"type": "FrustrationDetected", "count": 3, "escalated": true}}
+{"wait_ms": 300}
+{"recv": {"type": "ConversationText", "role": "assistant", "content": "I'm sorry. I'll have someone from registration call you back within the hour."}}
+{"recv_binary": {"bytes": 9600}}
+{"close": {"code": 1000, "reason": "replay finished"}}

@@ -1,0 +1,2 @@
+# The image needs nothing from the repo (compose mounts it), so nothing is sent: never .env.
+*

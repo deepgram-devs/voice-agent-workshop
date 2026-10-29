@@ -1,0 +1,37 @@
+{"meta": {"mission": "01-let-me-finish", "recorded_at": "2026-10-06", "note": "Shaped on a live run (typed goodbye, end_call, goodbye, AgentAudioDone), then edited by hand: request_id zeroed, greeting templated, LatencyReport frames dropped, the number-reading turns and the backchannel added. Backchannels need audio, so that line is hand-written."}}
+{"recv": {"type": "Welcome", "request_id": "00000000-0000-0000-0000-000000000000"}}
+{"expect": "Settings"}
+{"recv": {"type": "SettingsApplied"}}
+{"recv_binary": {"bytes": 3552}}
+{"recv": {"type": "ConversationText", "role": "assistant", "content": "{{settings.agent.greeting}}", "conversational_behavior": "default"}}
+{"recv": {"type": "History", "role": "assistant", "content": "{{settings.agent.greeting}}", "conversational_behavior": "default"}}
+{"recv_binary": {"bytes": 9600}}
+{"recv": {"type": "AgentAudioDone"}}
+{"note": "A program that hangs up on any AgentAudioDone closes here, before the caller has said a word."}
+{"wait_ms": 150}
+{"recv": {"type": "UserStartedSpeaking"}}
+{"recv": {"type": "ConversationText", "role": "user", "content": "Sure, it's five five five,", "conversational_behavior": "default"}}
+{"recv": {"type": "ConversationText", "role": "assistant", "content": "Mm-hm.", "conversational_behavior": "backchannel"}}
+{"recv_binary": {"bytes": 3552}}
+{"recv": {"type": "UserStartedSpeaking"}}
+{"recv": {"type": "ConversationText", "role": "user", "content": "zero one nine nine.", "conversational_behavior": "default"}}
+{"recv": {"type": "History", "role": "user", "content": "Sure, it's five five five, zero one nine nine.", "conversational_behavior": "default"}}
+{"recv_binary": {"bytes": 3552}}
+{"recv": {"type": "ConversationText", "role": "assistant", "content": "Got it, 555 0199. Anything else?", "conversational_behavior": "default"}}
+{"recv": {"type": "History", "role": "assistant", "content": "Got it, 555 0199. Anything else?", "conversational_behavior": "default"}}
+{"recv_binary": {"bytes": 9600}}
+{"recv": {"type": "AgentAudioDone"}}
+{"wait_ms": 150}
+{"recv": {"type": "UserStartedSpeaking"}}
+{"recv": {"type": "ConversationText", "role": "user", "content": "That's everything, thanks. Okay, bye!", "conversational_behavior": "default"}}
+{"recv": {"type": "History", "role": "user", "content": "That's everything, thanks. Okay, bye!", "conversational_behavior": "default"}}
+{"recv": {"type": "FunctionCallRequest", "functions": [{"id": "call_end_0001", "name": "end_call", "arguments": "{}", "client_side": true}]}}
+{"note": "No expect here, so a program that never answers still gets the rest and the check reports each TODO on its own. Live, the agent waits for the answer before it speaks."}
+{"wait_ms": 400}
+{"recv_binary": {"bytes": 3552}}
+{"recv": {"type": "ConversationText", "role": "assistant", "content": "Goodbye!", "conversational_behavior": "default"}}
+{"recv": {"type": "History", "role": "assistant", "content": "Goodbye!", "conversational_behavior": "default"}}
+{"recv_binary": {"bytes": 38688}}
+{"recv": {"type": "AgentAudioDone"}}
+{"note": "The real agent never hangs up by itself: the client has to close now."}
+{"wait_ms": 1500}

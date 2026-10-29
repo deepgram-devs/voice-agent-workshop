@@ -1,0 +1,9 @@
+{"meta": {"mission": "00-first-words", "recorded_at": "2026-10-06", "note": "Recorded live, then the request_id zeroed and the greeting replaced by {{settings.agent.greeting}}."}}
+{"recv": {"type": "Welcome", "request_id": "00000000-0000-0000-0000-000000000000"}}
+{"expect": "Settings"}
+{"recv": {"type": "SettingsApplied"}}
+{"recv_binary": {"bytes": 3552}}
+{"recv": {"type": "ConversationText", "role": "assistant", "content": "{{settings.agent.greeting}}", "conversational_behavior": "default"}}
+{"recv": {"type": "History", "role": "assistant", "content": "{{settings.agent.greeting}}", "conversational_behavior": "default"}}
+{"recv_binary": {"bytes": 23040}}
+{"close": {"code": 1000, "reason": "replay finished"}}

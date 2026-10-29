@@ -1,0 +1,8 @@
+{"meta": {"mission": "06-encore", "note": "Written by hand in the shape of the mission 00 recording: the check reads only the Settings your program sends."}}
+{"recv": {"type": "Welcome", "request_id": "00000000-0000-0000-0000-000000000000"}}
+{"expect": "Settings"}
+{"recv": {"type": "SettingsApplied"}}
+{"recv_binary": {"bytes": 3552}}
+{"recv": {"type": "ConversationText", "role": "assistant", "content": "{{settings.agent.greeting}}"}}
+{"recv_binary": {"bytes": 23040}}
+{"close": {"code": 1000, "reason": "replay finished"}}
