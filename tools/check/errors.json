@@ -1,0 +1,91 @@
+{
+  "$comment": "Vendored from the workshop site's errors.json (contract 1.0.0): the error body only. make check FORMAT=json emits this shape.",
+  "$id": "https://workshops.deepgram.com/contracts/errors.json",
+  "x-contract-version": "1.0.0",
+  "title": "Errors (error body)",
+  "$ref": "#/$defs/errorBody",
+  "$defs": {
+    "code": {
+      "type": "string",
+      "pattern": "^[A-Z][A-Z0-9]*(_[A-Z0-9]+)*$"
+    },
+    "absoluteUrl": {
+      "type": "string",
+      "format": "uri",
+      "pattern": "^https://"
+    },
+    "errorBody": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "error"
+      ],
+      "properties": {
+        "error": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "code",
+            "message"
+          ],
+          "properties": {
+            "code": {
+              "$ref": "#/$defs/code"
+            },
+            "message": {
+              "description": "One sentence for a person.",
+              "type": "string",
+              "minLength": 1,
+              "x-prose": true
+            },
+            "hint": {
+              "description": "What to do next.",
+              "type": "string",
+              "minLength": 1,
+              "x-prose": true
+            },
+            "doc_url": {
+              "$ref": "#/$defs/absoluteUrl"
+            },
+            "api_doc_url": {
+              "$ref": "#/$defs/absoluteUrl"
+            },
+            "step": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "workshop",
+                "mission"
+              ],
+              "properties": {
+                "workshop": {
+                  "type": "string",
+                  "pattern": "^[a-z0-9]+(-[a-z0-9]+)*$"
+                },
+                "mission": {
+                  "type": "string",
+                  "pattern": "^[a-z0-9]+(-[a-z0-9]+)*$"
+                },
+                "step": {
+                  "type": "string",
+                  "pattern": "^[a-z0-9]+(-[a-z0-9]+)*$"
+                },
+                "checkpoint": {
+                  "type": "string",
+                  "pattern": "^[a-z0-9]+(-[a-z0-9]+)*$"
+                }
+              }
+            },
+            "next_command": {
+              "type": "string",
+              "minLength": 1
+            },
+            "retryable": {
+              "type": "boolean"
+            }
+          }
+        }
+      }
+    }
+  }
+}
