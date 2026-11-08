@@ -39,7 +39,7 @@ Prefer not to install anything? Two ways round the three tools below: GitHub Cod
 
 **Can't install anything?** Work laptop, Chromebook, IT policies: run the whole workshop in GitHub Codespaces, free.
 
-[![Open in GitHub Codespaces](https://github.com/codespaces/badge.svg)](https://codespaces.new/deepgram-devs/voice-agent-workshop)
+On [the repo's GitHub page](https://github.com/deepgram-devs/voice-agent-workshop), choose **Code**, then the **Codespaces** tab, then **Create codespace**.
 
 That opens an editor and a terminal in the browser, with Node.js and make installed and `make setup` already run, but no JDK. From there:
 
@@ -73,7 +73,7 @@ Your language: Java (saved in .workshop-lang). To switch: make use py or make us
 
 Run `make setup` again later and it prints `[setup] The Java helpers are built.` and skips the build; if the SDK's jars have gone (a cleared `~/.m2`, a clone moved to another machine, Docker's `down -v`), it prints the `[setup] Building the Java helpers and fetching the SDK` line again and fetches them.
 
-`make use java` printed `Saved: Java. make check, run and live use it now. Add SDK=py to run one command in Python.`: from then on `make check`, `make run` and `make live` use Java and name the file they work on; the choice is saved in `.workshop-lang` (Git ignores it). [Pick a language](../README.md#pick-a-language) in the README covers switching.
+`make use java` printed `Saved: Java. make check, run, and live use it now. Add SDK=py to run one command in Python.`: from then on `make check`, `make run` and `make live` use Java and name the file they work on; the choice is saved in `.workshop-lang` (Git ignores it). [Pick a language](../README.md#pick-a-language) in the README covers switching.
 
 No `git` on your machine? Download the ZIP instead: green **Code** button, **Download ZIP** on the [repo page](https://github.com/deepgram-devs/voice-agent-workshop). Unzip it, `cd` into the folder it makes (`voice-agent-workshop-main`), and run `make use java` and `make setup` there.
 

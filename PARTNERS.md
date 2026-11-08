@@ -74,4 +74,4 @@ In the Voice Agent API, Flux voices speak English, so mission 04 uses an Aura-2 
 
 ## Your coding agent
 
-For everything Deepgram, start from the docs index at https://developers.deepgram.com/llms.txt, and give your coding agent the docs MCP server, https://developers.deepgram.com/_mcp/server.
+For everything Deepgram, start from the docs index at https://developers.deepgram.com/llms.txt, and give it to your coding agent too.

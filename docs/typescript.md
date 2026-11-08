@@ -35,7 +35,7 @@ Prefer not to install anything? Two ways round the three tools below: GitHub Cod
 
 **Can't install anything?** Work laptop, Chromebook, IT policies: run the whole workshop in GitHub Codespaces, free.
 
-[![Open in GitHub Codespaces](https://github.com/codespaces/badge.svg)](https://codespaces.new/deepgram-devs/voice-agent-workshop)
+On [the repo's GitHub page](https://github.com/deepgram-devs/voice-agent-workshop), choose **Code**, then the **Codespaces** tab, then **Create codespace**.
 
 That opens an editor and a terminal in the browser, with Node.js, pnpm and make installed and `make setup` already run. From there:
 
@@ -75,7 +75,7 @@ Then pick your language, once:
 make use ts
 ```
 
-It prints `Saved: TypeScript. make check, run and live use it now. Add SDK=py to run one command in Python.` From then on `make check`, `make run` and `make live` use TypeScript and name the file they work on; the choice is saved in `.workshop-lang` (Git ignores it). [Pick a language](../README.md#pick-a-language) in the README covers switching.
+It prints `Saved: TypeScript. make check, run, and live use it now. Add SDK=py to run one command in Python.` From then on `make check`, `make run` and `make live` use TypeScript and name the file they work on; the choice is saved in `.workshop-lang` (Git ignores it). [Pick a language](../README.md#pick-a-language) in the README covers switching.
 
 ## Your API key
 

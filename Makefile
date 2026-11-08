@@ -6,7 +6,7 @@
 #   make run 00             talk to your mission 00 agent: type lines, Ctrl-D (or Ctrl-C) hangs up. Needs DEEPGRAM_API_KEY or a workshop token in .env (MIC=1 for your mic, Python)
 #   make live 00            live check against the real API with your DEEPGRAM_API_KEY or your workshop token
 #
-# make use saves your language in .workshop-lang; check, run and live use it and
+# make use saves your language in .workshop-lang; check, run, and live use it and
 # name the start file they work on. Add SDK=py, SDK=ts or SDK=java to run one command in that language.
 # MISSION_TARGET=solution checks the reference answer instead of your start file.
 # In Docker, put "docker compose run --rm workshop" in front of each command (workshop-java for Java).
@@ -236,7 +236,7 @@ REPO_GOAL  = $(patsubst typecheck,ci,$(firstword $(filter $(REPO_GOALS),$(MAKECM
 extra_sdk  = For $(NAME_$(1)): make $(REPO_GOAL) SDK=$(1).
 extra_item = $(if $(filter repo,$(FROM)),$(extra_sdk),$(extra_use))
 MSG_NONE   = To run a mission, install $(call say_list,tool_item,$(AUTO_LANGS)), then run make setup.$(if $(EXTRA_LANGS), $(strip $(foreach l,$(EXTRA_LANGS),$(call extra_item,$(l)))))
-MSG_SAVED  = Saved: $(NAME_$(USE_LANG)). make check, run and live use it now.$(if $(OTHER_USE), Add SDK=$(OTHER_USE) to run one command in $(NAME_$(OTHER_USE)).)
+MSG_SAVED  = Saved: $(NAME_$(USE_LANG)). make check, run, and live use it now.$(if $(OTHER_USE), Add SDK=$(OTHER_USE) to run one command in $(NAME_$(OTHER_USE)).)
 OTHER_USE  = $(firstword $(filter-out $(USE_LANG),$(AUTO_LANGS)))
 # Java in the plain compose container (WORKSHOP_IN_DOCKER without a javac): that image has no JDK
 # and apt in a --rm container is gone next run, so its lines name the workshop-java service. Once

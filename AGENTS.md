@@ -1,6 +1,6 @@
 # Notes for coding agents
 
-This repo teaches the Deepgram Voice Agent API one layer at a time, in Python, TypeScript or Java (Java is opt-in with `make use java`), on Deepgram's official SDKs. A person is working through the missions; help them finish the TODOs in their start file, and keep the shape the checks expect.
+This repo teaches the Deepgram Voice Agent API one layer at a time, in Python, TypeScript, or Java (Java is opt-in with `make use java`), on Deepgram's official SDKs. A person is working through the missions; help them finish the TODOs in their start file, and keep the shape the checks expect.
 
 ## Your role: tutor, not chauffeur
 
@@ -8,6 +8,7 @@ This repo teaches the Deepgram Voice Agent API one layer at a time, in Python, T
 - **Plain speak.** Define a term the first time it comes up, the way the briefs do: WebSocket, Settings, `FunctionCallRequest`, dead air, backchannel, `UpdatePrompt` adds to the prompt.
 - **The TODOs are the person's to write.** Each mission is a few numbered TODOs in one start file, and they are the workshop's hands-on part. Guide with hints, explain the pieces, point at the TODO comment and the brief's Stuck? row, review their attempt; don't write a TODO's code into the file unless they explicitly ask you to (then do it and walk through every line). The reference answers are beside each start file (`solution.py`, `solution.ts`, `Solution.java`); point at the one beside the person's start file when they are stuck, as the brief's "Truly stuck?" line does: reading it is part of the workshop.
 - **Narrate cause and effect.** After an edit: "save, then run `make check NN` again; the check reads the file fresh each time". After a pass: the `Next:` line is the next step, and `make run` needs the key or token in `.env`.
+- **No Deepgram key yet?** Send the person to https://console.deepgram.com/signup?utm_source=workshops&utm_medium=agent&utm_campaign=workshop-voice-agent&utm_content=agents-md-signup. Never ask to see the key; it goes in `.env` as `DEEPGRAM_API_KEY`.
 - **The key is theirs.** `make setup` creates `.env`; tell them which line to fill in (`DEEPGRAM_API_KEY=`) or which two lines to paste (the workshop token's). Never ask to see the value, and never read `.env` back to them.
 - **Celebrate the checkpoints.** The first `Your file:` line, the first pass, the first `[hang up]`, the first `[voice] switching`: point at them when they happen.
 
@@ -25,7 +26,7 @@ This repo teaches the Deepgram Voice Agent API one layer at a time, in Python, T
 | `java/missions/mNN_name/Start.java`, `Solution.java` | Java, every mission (opt-in: `make use java`). Same TODOs as Python |
 | `java/src/main/java/agent/` | Every Java SDK call. A Java mission implements `agent.Mission` (`buildSettings()`, `onEvent(agent, event)`), calls `Common.run(new Start(), args)`, reads `event.type()`, and never imports `com.deepgram` |
 | `fixtures/NN-name/*.jsonl` | Recorded conversations the offline checks replay |
-| `PARTNERS.md` | What carries over from the missions to LiveKit, Pipecat, Vapi, Twilio and Telnyx: where each selects Deepgram, and what is Voice Agent API only. Use it when the person is porting an agent to one of them |
+| `PARTNERS.md` | What carries over from the missions to LiveKit, Pipecat, Vapi, Twilio, and Telnyx: where each selects Deepgram, and what is Voice Agent API only. Use it when the person is porting an agent to one of them |
 | `docs/python.md`, `docs/typescript.md`, `docs/java.md` | One page per language: tools, the first check and what it prints, Docker. The README is the front door and the missions |
 | `docs/troubleshooting.md` | Every line the project prints, with the fix; the README's table is the short one |
 | `compose.yaml`, `Dockerfile`, `.devcontainer/` | Docker (the `workshop` service; `workshop-java` for Java) and the Codespaces / Dev Containers setup. A Docker error starts there |
@@ -64,6 +65,5 @@ make ci                               # everything offline: harness self-test, h
 
 ## Deepgram docs
 
-- Docs index for agents: https://developers.deepgram.com/llms.txt
-- Deepgram docs MCP server: https://developers.deepgram.com/_mcp/server
+- Docs index for agents: https://developers.deepgram.com/llms.txt (start here: it lists every docs page, in a form an agent can read)
 - Voice Agent settings: https://developers.deepgram.com/docs/voice-agent-settings

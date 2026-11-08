@@ -125,7 +125,7 @@ test('c) make use ts saves ts; check runs TypeScript only and names the file; ma
   const use = make(dir, ['use', 'ts']);
   assert.equal(use.status, 0, use.text);
   assert.equal(saved(dir), 'ts\n');
-  assert.ok(use.lines.includes('Saved: TypeScript. make check, run and live use it now. Add SDK=py to run one command in Python.'), use.text);
+  assert.ok(use.lines.includes('Saved: TypeScript. make check, run, and live use it now. Add SDK=py to run one command in Python.'), use.text);
 
   const r = make(dir, ['check', '00']);
   assert.equal(r.status, 0, r.text);
@@ -736,7 +736,7 @@ test('java b) make use java saves it; check 00 runs only mission.sh on the Java 
   const use = make(dir, ['use', 'java']);
   assert.equal(use.status, 0, use.text);
   assert.equal(saved(dir), 'java\n');
-  assert.ok(use.lines.includes('Saved: Java. make check, run and live use it now. Add SDK=py to run one command in Python.'), use.text);
+  assert.ok(use.lines.includes('Saved: Java. make check, run, and live use it now. Add SDK=py to run one command in Python.'), use.text);
 
   const r = make(dir, ['check', '00']);
   assert.equal(r.status, 0, r.text);
@@ -889,7 +889,7 @@ test('java docker2) with a javac in the workshop-java container, Java runs as on
   const dir = javaFixture(['uv', 'pnpm', 'java']);
   const use = make(dir, ['use', 'java'], env);
   assert.equal(use.status, 0, use.text);
-  assert.equal(use.lines.at(-1), 'Saved: Java. make check, run and live use it now. Add SDK=py to run one command in Python.');
+  assert.equal(use.lines.at(-1), 'Saved: Java. make check, run, and live use it now. Add SDK=py to run one command in Python.');
   assert.ok(!use.text.includes(DOCKER_LINE) && !use.text.includes('adoptium'), use.text);
   const check = make(dir, ['check', '00'], env);
   assert.equal(check.status, 0, check.text);
@@ -958,7 +958,7 @@ test('java i) no uv and no pnpm: make use names Java\'s way in and probes nothin
 
   const pick = make(dir, ['use', 'java']);
   assert.equal(pick.status, 0, pick.text);
-  const savedLine = 'Saved: Java. make check, run and live use it now. Add SDK=py to run one command in Python.';
+  const savedLine = 'Saved: Java. make check, run, and live use it now. Add SDK=py to run one command in Python.';
   assert.ok(pick.lines.includes(savedLine), pick.text);
   assert.ok(!pick.lines.includes(NEEDS_JDK), pick.text);
   const r = make(dir, ['check', '00']);
