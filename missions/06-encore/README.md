@@ -97,7 +97,7 @@ The agent narrates it in the voice, speed and expressivity you set. Press Ctrl-D
 | `FAIL  TODO 2: speed is from 0.85 to 1.15, in steps of 0.05` | Off the range, or off the 0.05 steps (1.03, say). 0.85 to 1.15 in steps of 0.05: this mission's range, and the check holds you to it. The API takes 0.5 to 1.5. | Same fix. |
 | `FAIL  TODO 3: set agent.speak.provider.expressivity to a whole number other than 0` | `EXPRESSIVITY` is still 0, or a fraction (then the next line prints too). | 1 or -1, say (TODO 3). |
 | `FAIL  TODO 3: expressivity is a whole number from -2 to 2` | Off the range, or a fraction (1.5, say; the line above prints with it). | Same fix. |
-| `FAIL  Keep a Flux voice (a flux-... model with version "v2"): Speed and Expressivity in this form belong to Flux voices` | An Aura-2 voice. With `"version": "v2"` still on the line, mission 00's Aura line (`agent.speak.provider: aura-2-thalia-en is an Aura voice, so leave version out ...`) prints above this one as well. | Keep a `flux-...` voice with `version: "v2"`. |
+| `FAIL  Keep a Deepgram Flux TTS voice (a flux-... model with version "v2"): Speed and Expressivity in this form belong to Flux TTS voices` | An Aura-2 voice. With `"version": "v2"` still on the line, mission 00's Aura line (`agent.speak.provider: aura-2-thalia-en is an Aura voice, so leave version out ...`) prints above this one as well. | Keep a `flux-...` voice with `version: "v2"`. |
 | You changed `EXPRESSIVITY` and the run sounds the same | Expressivity locks in when the voice starts and holds for the whole call. | Hang up and run again. |
 | Both `.wav` files sound the same | The second run wrote over `out/last-call.wav`. | Copy the first file before the second run: `cp out/last-call.wav out/take-1.wav`. |
 

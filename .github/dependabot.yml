@@ -1,0 +1,67 @@
+# Dependency updates for each track, the check harness, the Actions and the Docker image.
+#
+# Every entry sets target-branch: main. The repo's default branch is `release` (what
+# "Use this template" and Codespaces copy), and updates must never aim at it: they land
+# on main and reach release with the next tag. tools/ci/dependabot.test.mjs checks that
+# every entry has it.
+#
+# Your own copy of this repo has no main unless you make one: delete this file to turn
+# the updates off, or remove the target-branch lines so they aim at your default branch.
+version: 2
+updates:
+  # Python track: python/pyproject.toml and python/uv.lock.
+  - package-ecosystem: uv
+    directory: /python
+    target-branch: main
+    schedule:
+      interval: weekly
+    groups:
+      python:
+        update-types: [minor, patch]
+
+  # TypeScript track: typescript/package.json and typescript/pnpm-lock.yaml.
+  - package-ecosystem: npm
+    directory: /typescript
+    target-branch: main
+    schedule:
+      interval: weekly
+    groups:
+      typescript:
+        update-types: [minor, patch]
+
+  # Java track: java/pom.xml.
+  - package-ecosystem: maven
+    directory: /java
+    target-branch: main
+    schedule:
+      interval: weekly
+    groups:
+      java:
+        update-types: [minor, patch]
+
+  # The check harness every track shares: tools/replay-server/package-lock.json.
+  - package-ecosystem: npm
+    directory: /tools/replay-server
+    target-branch: main
+    schedule:
+      interval: weekly
+    groups:
+      harness:
+        update-types: [minor, patch]
+
+  # The workflows' actions (.github/workflows).
+  - package-ecosystem: github-actions
+    directory: /
+    target-branch: main
+    schedule:
+      interval: weekly
+    groups:
+      actions:
+        update-types: [minor, patch]
+
+  # The workshop image: Dockerfile (node and uv base images).
+  - package-ecosystem: docker
+    directory: /
+    target-branch: main
+    schedule:
+      interval: weekly

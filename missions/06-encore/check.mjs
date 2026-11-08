@@ -14,7 +14,7 @@ function voiceChecks(s, t) {
   const provider = t.get(settings, 'agent.speak.provider') ?? {};
   t.ok(
     typeof provider.model === 'string' && provider.model.startsWith('flux-') && provider.version === 'v2',
-    'Keep a Flux voice (a flux-... model with version "v2"): Speed and Expressivity in this form belong to Flux voices',
+    'Keep a Deepgram Flux TTS voice (a flux-... model with version "v2"): Speed and Expressivity in this form belong to Flux TTS voices',
   );
   return { settings, provider };
 }

@@ -9,9 +9,15 @@
 # Why nightly here (the workshop app's own workflow runs live checks on demand
 # only): this file ships with the standalone attendee repo, and a nightly live
 # run against the latest SDK releases is how that repo hears about an SDK or API
-# change before an attendee does. A copy of the repo with no DEEPGRAM_API_KEY
-# secret (a fork, a classroom clone) skips the nightly live job cleanly, with a
-# notice; a manual run without the key fails, so nobody reads a skip as a pass.
+# change before an attendee does. On deepgram-devs/voice-agent-workshop with no
+# DEEPGRAM_API_KEY secret, the nightly live job skips cleanly, with a notice; a
+# manual run without the key fails, so nobody reads a skip as a pass.
+#
+# Copies: the nightly schedule, the live jobs and the name scan run only on
+# deepgram-devs/voice-agent-workshop. Every job carries a github.repository guard
+# (tools/ci/workflow-guard.test.mjs checks it), so a fork, a template copy or a
+# classroom clone runs the offline jobs on its own pushes and pull requests and
+# nothing else: no nightly runs on its minutes, and no key or secret it lacks.
 #
 # Repository settings this needs:
 #   secret   DEEPGRAM_API_KEY     key for the live job
@@ -37,6 +43,7 @@ permissions:
 jobs:
   offline:
     name: offline ${{ matrix.language }} (${{ matrix.sdk == 'pinned-jdk17' && 'pinned SDK, JDK 17' || format('{0} SDK', matrix.sdk) }})
+    if: github.event_name != 'schedule' || github.repository == 'deepgram-devs/voice-agent-workshop'
     runs-on: ubuntu-latest
     # A check stuck on a pipe fails its own test at 60 s; this is the backstop.
     timeout-minutes: 30
@@ -108,6 +115,25 @@ jobs:
       - name: Harness self-test, helper unit tests, solutions pass, start files fail
         run: make ci
 
+  # The repo's own files, outside the tracks: AGENTS.md sends agents to the docs index and
+  # carries the no-key rule (tools/check-agents-md.mjs); this workflow's upstream guards
+  # (tools/ci).
+  repo-files:
+    name: repo files (AGENTS.md, CI guards)
+    if: github.event_name != 'schedule' || github.repository == 'deepgram-devs/voice-agent-workshop'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: AGENTS.md points at the docs index and has the no-key rule
+        run: |
+          node --test tools/check-agents-md.test.mjs
+          node tools/check-agents-md.mjs
+      - name: The nightly schedule and the live jobs run only on the upstream repo
+        run: node --test tools/ci/*.test.mjs
+
   # --- Other platforms (README "On Windows", "On Linux") ---
   # Windows runners can't run Linux containers, so Docker Desktop, Dev Containers
   # and Codespaces from a Windows browser are tested by hand.
@@ -117,6 +143,7 @@ jobs:
   # every text file LF, so the Dev Containers script runs and make ci passes.
   crlf-clone:
     name: Windows-style clone (autocrlf=true)
+    if: github.event_name != 'schedule' || github.repository == 'deepgram-devs/voice-agent-workshop'
     runs-on: ubuntu-latest
     steps:
       - run: git config --global core.autocrlf true
@@ -140,6 +167,7 @@ jobs:
   # pyproject turns them on) and GNU Make 4.4, with bash as /bin/sh.
   fedora:
     name: Fedora (distro Node.js, uv, make 4.4)
+    if: github.event_name != 'schedule' || github.repository == 'deepgram-devs/voice-agent-workshop'
     runs-on: ubuntu-latest
     container: fedora:42
     steps:
@@ -159,6 +187,7 @@ jobs:
   # and the README's chown line gives every one back.
   docker-linux:
     name: Docker Engine on Linux (compose)
+    if: github.event_name != 'schedule' || github.repository == 'deepgram-devs/voice-agent-workshop'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -223,6 +252,7 @@ jobs:
   # (setup-harness, setup-<id>) and never runs these lines.
   host-sequence:
     name: the ${{ matrix.language }} page's commands on a laptop
+    if: github.event_name != 'schedule' || github.repository == 'deepgram-devs/voice-agent-workshop'
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
@@ -286,6 +316,7 @@ jobs:
   # way, as root in the image, and passed end to end.
   codespaces:
     name: Codespaces image (python:3.12-trixie), the Java page's path
+    if: github.event_name != 'schedule' || github.repository == 'deepgram-devs/voice-agent-workshop'
     runs-on: ubuntu-latest
     container: mcr.microsoft.com/devcontainers/python:3.12-trixie
     env:
@@ -316,6 +347,7 @@ jobs:
   # "On Windows" says: Node.js 22 from NodeSource (apt's 18 is too old), uv, pnpm.
   wsl:
     name: WSL Ubuntu 24.04 (repo in the Linux home folder)
+    if: github.event_name != 'schedule' || github.repository == 'deepgram-devs/voice-agent-workshop'
     runs-on: windows-latest
     defaults:
       run:
@@ -344,8 +376,10 @@ jobs:
 
   names:
     name: name scan
-    # Fork PRs and Dependabot runs get no repository secrets: skip them here, by name.
+    # Upstream only (a copy has no FORBIDDEN_TERMS secret). Fork PRs and Dependabot runs
+    # get no repository secrets: skip them here, by name.
     if: >-
+      github.repository == 'deepgram-devs/voice-agent-workshop' &&
       github.actor != 'dependabot[bot]' &&
       (github.event_name != 'pull_request' ||
        github.event.pull_request.head.repo.full_name == github.repository)
@@ -368,7 +402,9 @@ jobs:
 
   live-key:
     name: live key present
-    if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
+    if: >-
+      github.repository == 'deepgram-devs/voice-agent-workshop' &&
+      (github.event_name == 'schedule' || github.event_name == 'workflow_dispatch')
     runs-on: ubuntu-latest
     outputs:
       present: ${{ steps.key.outputs.present }}
@@ -390,7 +426,7 @@ jobs:
   live:
     name: live ${{ matrix.language }}
     needs: live-key
-    if: needs.live-key.outputs.present == 'true'
+    if: github.repository == 'deepgram-devs/voice-agent-workshop' && needs.live-key.outputs.present == 'true'
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false

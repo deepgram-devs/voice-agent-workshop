@@ -1,0 +1,7 @@
+# Who reviews what. Each track has its own line so it can name its own owner; until it
+# does, every path falls back to the default owner. The last matching line wins.
+*               @dg-coreylweathers
+
+/python/        @dg-coreylweathers
+/typescript/    @dg-coreylweathers
+/java/          @dg-coreylweathers

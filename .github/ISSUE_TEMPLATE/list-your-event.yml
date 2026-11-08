@@ -1,0 +1,62 @@
+name: List your event
+description: Running the voice agent workshop at a meetup, a class, or a conference? Tell us, and we can list it.
+title: "Event: "
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Running a workshop? List your event. Everything you write here is public, so give an organizer contact you're happy to share.
+  - type: input
+    id: event-name
+    attributes:
+      label: Event name
+    validations:
+      required: true
+  - type: input
+    id: event-url
+    attributes:
+      label: Event page
+      description: Where people sign up or read about it.
+      placeholder: https://
+    validations:
+      required: true
+  - type: input
+    id: date
+    attributes:
+      label: Date and time
+      description: With the time zone.
+      placeholder: 2026-12-03, 18:00 to 20:30 America/Los_Angeles
+    validations:
+      required: true
+  - type: dropdown
+    id: format
+    attributes:
+      label: Format
+      options:
+        - In person
+        - Online
+        - Hybrid
+    validations:
+      required: true
+  - type: input
+    id: location
+    attributes:
+      label: City and venue
+      description: Leave it empty for an online event.
+    validations:
+      required: false
+  - type: checkboxes
+    id: languages
+    attributes:
+      label: Languages you'll teach
+      options:
+        - label: Python
+        - label: TypeScript
+        - label: Java
+  - type: input
+    id: contact
+    attributes:
+      label: Organizer contact
+      description: A public profile or an email address you're happy to show.
+    validations:
+      required: true

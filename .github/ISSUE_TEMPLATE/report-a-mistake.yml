@@ -1,0 +1,42 @@
+name: Report a mistake
+description: Something on a page, in a brief, or in what a command prints is wrong, unclear, or hard to use.
+title: "Mistake: "
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for telling us. One line about what lost you is enough. Never paste your Deepgram key or your workshop token here: this page is public.
+  - type: input
+    id: page-url
+    attributes:
+      label: Page URL
+      description: The page with the mistake, on the workshop site or in this repo. For something a command printed, give the command instead.
+      placeholder: https://workshops.deepgram.com/voice-agent
+    validations:
+      required: true
+  - type: textarea
+    id: what
+    attributes:
+      label: What's wrong
+      description: What you read or saw, and what you expected. Barriers count too, like something you couldn't reach with a keyboard or a screen reader.
+    validations:
+      required: true
+  - type: dropdown
+    id: track
+    attributes:
+      label: Your language
+      options:
+        - Python
+        - TypeScript
+        - Java
+        - Not about one language
+    validations:
+      required: false
+  - type: textarea
+    id: output
+    attributes:
+      label: What the command printed
+      description: If a command printed the mistake, paste its output. Check it has no key or token in it.
+      render: text
+    validations:
+      required: false
