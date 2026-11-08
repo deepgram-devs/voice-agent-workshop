@@ -1,11 +1,12 @@
 name: List your event
 description: Running the voice agent workshop at a meetup, a class, or a conference? Tell us, and we can list it.
 title: "Event: "
+labels: ["event"]
 body:
   - type: markdown
     attributes:
       value: |
-        Running a workshop? List your event. Everything you write here is public, so give an organizer contact you're happy to share.
+        Running a workshop? List your event. Everything you write here is public, so give an organizer contact you're happy to share. Never paste a key or a token.
   - type: input
     id: event-name
     attributes:

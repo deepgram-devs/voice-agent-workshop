@@ -411,7 +411,8 @@ test('docker a) make help has the Docker line; with WORKSHOP_IN_DOCKER (compose.
   assert.equal(trimmed[0], 'make setup              install the check harness and the languages you have tools for (SDK=py, SDK=ts or SDK=java: that one language); creates .env');
   assert.ok(trimmed.includes('make run 00             talk to your mission 00 agent: type lines, Ctrl-D (or Ctrl-C) hangs up. Needs DEEPGRAM_API_KEY or a workshop token in .env (MIC=1 for your mic, Python)'), plain.text);
   assert.ok(trimmed.includes('MISSION_TARGET=solution checks the reference answer instead of your start file.'), plain.text);
-  assert.equal(trimmed.length, 11, 'the ten help lines, then the missions line');
+  assert.ok(trimmed.some((l) => l.startsWith('make check 00 FORMAT=json ')), plain.text);
+  assert.equal(trimmed.length, 12, 'the eleven help lines, then the missions line');
   assert.ok(plain.lines.at(-1).startsWith('Missions with checks: '), plain.text);
 });
 

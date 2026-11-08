@@ -1,4 +1,4 @@
-# Using LiveKit, Pipecat, Vapi, Twilio or Telnyx? Here's what carries over
+# Using Twilio, Telnyx, LiveKit, Pipecat, or Vapi? Here's what carries over
 
 The missions build an agent on the Deepgram Voice Agent API: one WebSocket, one Settings message, and Deepgram runs hearing, thinking and voice for you. Many teams build on a voice platform, with Deepgram selected inside it. This page shows, platform by platform, where Deepgram is selected and which parts of your mission files you can take with you.
 

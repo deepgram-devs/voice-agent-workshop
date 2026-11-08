@@ -222,11 +222,21 @@ The smallest program, with no helpers: `uv run python examples/first_settings.py
 
 The SDK versions are pinned exactly (`deepgram-sdk` 7.12.0, `@deepgram/sdk` 5.14.0 and `com.deepgram:deepgram-java-sdk` 0.11.1). CI runs the offline checks on every push, against those pins and against the latest releases, with Java on JDK 17 and 21. It also runs each page's Docker commands on Docker Engine (including coming back after `docker compose down -v`), each page's laptop commands, and the Java page's Codespaces path on the dev container image. The nightly live checks run in Python and TypeScript against the pins when the repository has a `DEEPGRAM_API_KEY` secret. The live checks, the nightly schedule, and the name scan run only on `deepgram-devs/voice-agent-workshop`: a fork or a copy of your own runs the offline checks on its pushes and pull requests, and nothing on a timer.
 
-Building on LiveKit, Pipecat, Vapi, Twilio, or Telnyx? [PARTNERS.md](PARTNERS.md) shows what carries over from the missions.
+Using Twilio, Telnyx, LiveKit, Pipecat, or Vapi? [PARTNERS.md](PARTNERS.md) shows what carries over from the missions.
 
 **Your own copy.** `.github/dependabot.yml` opens dependency update pull requests against `main` (its `target-branch: main` lines). A copy made with **Use this template** has no `main` unless you make one: delete the file to turn the updates off, or remove its `target-branch` lines so they aim at your copy's default branch.
 
 Writing a mission, or adding your language or framework? Read [CONTRIBUTING.md](CONTRIBUTING.md). The project is MIT licensed ([LICENSE](LICENSE)), so take any of it into your own app.
+
+## Using this for your own event
+
+You can teach this workshop at a meetup, in a class, or inside your team. The code is MIT licensed, so fork it or clone it.
+
+- **Before the day.** Run `make setup` and `make check 00` yourself, in each language you'll teach. Each attendee needs a Deepgram API key of their own in `.env` ([Your API key](#your-api-key)), and missions 01 and 02 need a project that has the `timing` feature.
+- **On the day.** Attendees work through the missions at their own pace; `make check NN` tells each of them what's left, with no key and no network. Add `FORMAT=json` and it prints the same result as JSON, for a script or a coding agent.
+- **Tell us.** [List your event](https://github.com/deepgram-devs/voice-agent-workshop/issues/new?template=list-your-event.yml) so people can find it. Want help planning a session for a class or a team? [Run it for a group](https://github.com/deepgram-devs/voice-agent-workshop/issues/new?template=run-it-for-a-group.yml). Running an event or a platform and want something added for it? [Propose for an event](https://github.com/deepgram-devs/voice-agent-workshop/issues/new?template=propose-for-an-event.yml). Found a mistake? [Report it](https://github.com/deepgram-devs/voice-agent-workshop/issues/new?template=report-a-mistake.yml).
+
+Issues here are public, so never put a key or a token in one.
 
 ## Keep going
 

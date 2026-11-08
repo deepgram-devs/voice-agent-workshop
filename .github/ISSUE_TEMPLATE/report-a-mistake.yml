@@ -36,7 +36,7 @@ body:
     id: output
     attributes:
       label: What the command printed
-      description: If a command printed the mistake, paste its output. Check it has no key or token in it.
+      description: If a command printed the mistake, paste its output, or the JSON from make check FORMAT=json. Check it has no key or token in it.
       render: text
     validations:
       required: false

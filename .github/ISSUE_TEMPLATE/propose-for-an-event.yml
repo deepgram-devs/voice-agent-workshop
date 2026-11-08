@@ -1,0 +1,48 @@
+name: Propose for an event
+description: You run an event, or a platform, and you'd like to propose changes to the workshop for it.
+title: "Proposal: "
+labels: ["proposal"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Partners and event owners: tell us what you'd like to add or change for your event, such as an extra step, a note about your platform, or a different order. Everything you write here is public. Never paste a key or a token.
+  - type: input
+    id: event
+    attributes:
+      label: Event or organization
+      description: The event's name, or your organization's.
+    validations:
+      required: true
+  - type: input
+    id: event-url
+    attributes:
+      label: Event page
+      placeholder: https://
+    validations:
+      required: false
+  - type: dropdown
+    id: kind
+    attributes:
+      label: What you're proposing
+      options:
+        - An extra step for your event
+        - A change to the order or the time
+        - A note about your platform
+        - Something else
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: The proposal
+      description: What you'd like, and what your attendees will have done before they get to it.
+    validations:
+      required: true
+  - type: input
+    id: contact
+    attributes:
+      label: Contact
+      description: A public profile or an email address you're happy to show.
+    validations:
+      required: true

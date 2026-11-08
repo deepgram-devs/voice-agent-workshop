@@ -4,6 +4,7 @@
 #   make use py             pick your language once: py (Python), ts (TypeScript) or java (Java)
 #   make check 00           offline check of your start file: no key, no network
 #   make run 00             talk to your mission 00 agent: type lines, Ctrl-D (or Ctrl-C) hangs up. Needs DEEPGRAM_API_KEY or a workshop token in .env (MIC=1 for your mic, Python)
+#   make check 00 FORMAT=json   the same check as one JSON line per language on stdout (errors.json shape: code, message, hint, doc_url, retryable); the human text goes to stderr
 #   make live 00            live check against the real API with your DEEPGRAM_API_KEY or your workshop token
 #
 # make use saves your language in .workshop-lang; check, run, and live use it and
@@ -275,7 +276,7 @@ MSG_FILE   = $(if $(SAVED_SHOW),$(MSG_FILE_BAD),$(MSG_FILE_EMPTY))
 MSG_BAD_SDK = $(if $(filter command line,$(origin SDK)),$(MSG_BAD_SDK_CMD),$(MSG_BAD_SDK_ENV))
 MSG_SDK_OVERRIDES = $(if $(filter command line,$(origin SDK)),$(MSG_SDK_CMD),$(MSG_SDK_ENV))
 
-TARGETS := help setup setup-harness $(addprefix setup-,$(LANGS)) need-good-sdk use run check live typecheck ci ci-solutions ci-starts harness-test names names-test hints-test make-test unit live-all need-mission need-sdk
+TARGETS := help setup setup-harness $(addprefix setup-,$(LANGS)) need-good-sdk use run check live typecheck ci ci-solutions ci-starts harness-test names names-test hints-test check-json-test make-test unit live-all need-mission need-sdk need-format
 .PHONY: $(TARGETS)
 
 help:
@@ -349,19 +350,19 @@ setup-java:
 	cd java && sh mission.sh setup
 
 need-mission: need-sdk
-	@test -n "$(MDIR)" || (echo "Which mission? e.g. make check 00  (have: $(CHECKED))"; exit 2)
-	@test -f missions/$(MDIR)/check.mjs || (echo "missions/$(MDIR) has no offline check. Read missions/$(MDIR)/README.md"; exit 2)
+	@test -n "$(MDIR)" || ($(call SAY,Which mission? e.g. make check 00  (have: $(CHECKED))); exit 2)
+	@test -f missions/$(MDIR)/check.mjs || ($(call SAY,missions/$(MDIR) has no offline check. Read missions/$(MDIR)/README.md); exit 2)
 
 need-sdk:
 	@case "$(FROM)" in \
-	  none) $(if $(INSTALLED),echo "$(PICK_LINE)",echo "$(MSG_NONE)"); exit 2;; \
-	  saved) $(if $(SEL),:,echo "$(MSG_FILE)"; exit 2);; \
-	  sdk) $(if $(SDK_BAD),echo "$(MSG_BAD_SDK)"; exit 2,:);; \
+	  none) $(if $(INSTALLED),$(call SAY,$(PICK_LINE)),$(call SAY,$(MSG_NONE))); exit 2;; \
+	  saved) $(if $(SEL),:,$(call SAY,$(MSG_FILE)); exit 2);; \
+	  sdk) $(if $(SDK_BAD),$(call SAY,$(MSG_BAD_SDK)); exit 2,:);; \
 	esac; \
-	$(if $(SEL),:,echo "$(MSG_NONE)"; exit 2); \
-	$(foreach l,$(SEL),if ! $(DETECT_$(l)) >/dev/null 2>&1; then echo "$(call MSG_NEEDS,$(l))"; exit 2; fi;) \
-	$(HARNESS_READY) || { echo "$(MSG_NO_HARNESS)"; exit 2; }; \
-	$(foreach l,$(SEL),if ! $(READY_$(l)) >/dev/null 2>&1; then echo "$(call MSG_NOT_SETUP,$(l))"; exit 2; fi;) :
+	$(if $(SEL),:,$(call SAY,$(MSG_NONE)); exit 2); \
+	$(foreach l,$(SEL),if ! $(DETECT_$(l)) >/dev/null 2>&1; then $(call SAY,$(call MSG_NEEDS,$(l))); exit 2; fi;) \
+	$(HARNESS_READY) || { $(call SAY,$(MSG_NO_HARNESS)); exit 2; }; \
+	$(foreach l,$(SEL),if ! $(READY_$(l)) >/dev/null 2>&1; then $(call SAY,$(call MSG_NOT_SETUP,$(l))); exit 2; fi;) :
 
 # One language at a time. MIC=1 talks through your microphone and speakers
 # (Python only: `make run 01 SDK=py MIC=1`; in a container it stops before the mic
@@ -374,15 +375,30 @@ run: need-mission
 	@echo "Running $(call what,$(SEL)): $(FILE_$(SEL))"
 	@$(RUN_$(SEL))
 
+# FORMAT=json (check only): each language's output is captured, shown on stderr, and
+# turned into one JSON line on stdout by tools/check/report.mjs. The exit codes don't change.
+# SAY prints a line that stops make before any check runs: text, or in JSON mode a JSON line.
+JSON := $(if $(filter json,$(FORMAT)),1)
+SAY   = $(if $(JSON),node tools/check/report.mjs --stop "$(1)" --mission "$(MDIR)" --again "$(AGAIN)",echo "$(1)")
+CHECK_ONE = echo "Checking $(call what,$(1)): $(FILE_$(1))"; ($(CHECK_$(1))) || status=1; $(if $(POSTCHECK_$(1)),if [ "$(TYPECHECK)" != "0" ]; then $(POSTCHECK_$(1)); fi;)
+# The status rides out of the command substitution on its last line.
+JSON_ONE  = save=$$status; res=$$( status=0; { $(call CHECK_ONE,$(1)) } 2>&1; echo; echo "__rc=$$status" ); rc=$${res\#\#*__rc=}; out=$${res%__rc=*}; \
+  printf '%s\n' "$$out" >&2; \
+  printf '%s\n' "$$out" | node tools/check/report.mjs --track $(1) --mission "$(MDIR)" --target "$(TARGET)" --file "$(FILE_$(1))" --status "$$rc" --again "$(AGAIN)"; \
+  [ "$$rc" = 0 ] || save=1; status=$$save;
+
+need-format:
+	@$(if $(or $(JSON),$(if $(FORMAT),,x)),:,echo "FORMAT=$(call safe,$(FORMAT)) isn't a format: use FORMAT=json, or leave it out."; exit 2)
+
 # Each language runs even when another fails, so one failure never hides another.
 # A language without this mission yet says so and the others still run; then the
 # exit is 2, unless a check failed (1). A pass on your start file prints the next
 # step (tools/hints/next-step.mjs).
-check: need-mission
+check: need-format need-mission
 	@status=0; notyet=""; \
-	$(foreach l,$(SEL),$(if $(call has,$(l)),echo "Checking $(call what,$(l)): $(FILE_$(l))"; ($(CHECK_$(l))) || status=1; $(if $(POSTCHECK_$(l)),if [ "$(TYPECHECK)" != "0" ]; then $(POSTCHECK_$(l)); fi;),echo "$(call MSG_NOT_YET,$(l))"; notyet=1;)) \
+	$(foreach l,$(SEL),$(if $(call has,$(l)),$(if $(JSON),$(call JSON_ONE,$(l)),$(call CHECK_ONE,$(l))),$(if $(JSON),echo "$(call MSG_NOT_YET,$(l))" >&2; node tools/check/report.mjs --not-yet "$(call MSG_NOT_YET,$(l))" --track $(l) --mission "$(MDIR)" --again "$(AGAIN)";,echo "$(call MSG_NOT_YET,$(l))";) notyet=1;)) \
 	if [ $$status -eq 0 ] && [ -n "$$notyet" ]; then status=2; fi; \
-	if [ $$status -eq 0 ] && [ "$(MISSION_TARGET)" != "solution" ]; then node tools/hints/next-step.mjs $(MDIR) $(HINT_SDK) $(foreach l,$(SEL),"$(NAME_$(l))=$(FILE_$(l))"); fi; \
+	if [ $$status -eq 0 ] && [ "$(MISSION_TARGET)" != "solution" ] && [ -z "$(JSON)" ]; then node tools/hints/next-step.mjs $(MDIR) $(HINT_SDK) $(foreach l,$(SEL),"$(NAME_$(l))=$(FILE_$(l))"); fi; \
 	exit $$status
 
 live: need-mission
@@ -425,6 +441,10 @@ names-test:
 # The hints a pass and the Codespaces setup print: tools/hints and .devcontainer/key-note.sh.
 hints-test:
 	node --test tools/hints/hints.test.mjs
+
+# FORMAT=json output: tools/check. Set SDK=py, SDK=ts or SDK=java to run the end-to-end cases.
+check-json-test:
+	node --test tools/check/report.test.mjs
 
 # This Makefile's language choice, run against stub uv and pnpm in a temp folder,
 # and the line endings a Windows clone gets (eol.test.mjs).
@@ -470,7 +490,7 @@ ci-starts: need-sdk
 typecheck: need-sdk
 	@$(if $(filter ts,$(SEL)),cd typescript && pnpm -s tsc --noEmit -p . && echo "TypeScript (tsc): the project typechecks",:)
 
-ci: harness-test names-test hints-test make-test unit typecheck ci-solutions ci-starts
+ci: harness-test names-test hints-test check-json-test make-test unit typecheck ci-solutions ci-starts
 
 # `make check 00`, `make use ts`: let the second word ride along as a goal that
 # does nothing. Only after run, check, live or use, so `make names-test names`

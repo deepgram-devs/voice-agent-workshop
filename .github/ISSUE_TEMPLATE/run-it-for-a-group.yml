@@ -1,0 +1,57 @@
+name: Run it for a group
+description: You want to teach this workshop to a class, a team, or a meetup, and you'd like help planning it.
+title: "Group: "
+labels: ["group"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Tell us about your group and we'll point you to what helps. Everything you write here is public, so keep contact details to ones you're happy to share. Never paste a key or a token.
+  - type: input
+    id: group
+    attributes:
+      label: Who's the group
+      description: A class, a team, a meetup, or a club, and roughly how many people.
+      placeholder: A university course, about 30 people
+    validations:
+      required: true
+  - type: dropdown
+    id: format
+    attributes:
+      label: Format
+      options:
+        - In person
+        - Online
+        - Hybrid
+    validations:
+      required: true
+  - type: input
+    id: time
+    attributes:
+      label: How long you have
+      description: For one session, and how many sessions.
+      placeholder: One session of 2 hours
+    validations:
+      required: true
+  - type: checkboxes
+    id: languages
+    attributes:
+      label: Languages your group will use
+      options:
+        - label: Python
+        - label: TypeScript
+        - label: Java
+  - type: textarea
+    id: help
+    attributes:
+      label: What would help most
+      description: Keys for your group, a shorter path through the missions, a question about the setup, or something else.
+    validations:
+      required: false
+  - type: input
+    id: contact
+    attributes:
+      label: Contact
+      description: A public profile or an email address you're happy to show.
+    validations:
+      required: true

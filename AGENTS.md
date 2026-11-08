@@ -1,5 +1,6 @@
 # Notes for coding agents
 
+<!-- agent-instructions:start -->
 This repo teaches the Deepgram Voice Agent API one layer at a time, in Python, TypeScript, or Java (Java is opt-in with `make use java`), on Deepgram's official SDKs. A person is working through the missions; help them finish the TODOs in their start file, and keep the shape the checks expect.
 
 ## Your role: tutor, not chauffeur
@@ -52,6 +53,7 @@ make use py                           # the person runs this once to pick py, ts
 make check NN                         # offline check of the start file in the person's language: no key, no network
 make check NN SDK=py                  # this one command in one language (py, ts or java), whatever is saved
 make check NN MISSION_TARGET=solution # the reference answer
+make check NN FORMAT=json             # the same check as one JSON line on stdout (code, message, hint, doc_url, retryable per error); the text goes to stderr
 make run NN                           # talk to the agent (needs a key or a workshop token); saves out/last-call.wav
 make unit                             # helper unit tests, every language installed (Java only with SDK=java)
 make ci                               # everything offline: harness self-test, hint and Makefile tests, unit tests, solutions pass, start files fail (Java only with SDK=java)
@@ -67,3 +69,4 @@ make ci                               # everything offline: harness self-test, h
 
 - Docs index for agents: https://developers.deepgram.com/llms.txt (start here: it lists every docs page, in a form an agent can read)
 - Voice Agent settings: https://developers.deepgram.com/docs/voice-agent-settings
+<!-- agent-instructions:end -->
